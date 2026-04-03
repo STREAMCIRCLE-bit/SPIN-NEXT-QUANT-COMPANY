@@ -1,1 +1,1401 @@
 
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Finance 101 — Manual Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+Thai:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:       #08090f;
+  --bg2:      #0e1019;
+  --bg3:      #13151f;
+  --bg4:      #1a1d2a;
+  --border:   rgba(255,255,255,0.08);
+  --border2:  rgba(255,255,255,0.14);
+  --text:     #e8eaf0;
+  --muted:    #7a7f94;
+  --muted2:   #4a4f62;
+  --red:      #e94560;
+  --blue:     #00d2ff;
+  --purple:   #a855f7;
+  --green:    #22c55e;
+  --amber:    #f59e0b;
+  --red-bg:   rgba(233,69,96,0.1);
+  --blue-bg:  rgba(0,210,255,0.1);
+  --purple-bg:rgba(168,85,247,0.1);
+  --green-bg: rgba(34,197,94,0.1);
+  --amber-bg: rgba(245,158,11,0.1);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Noto Sans Thai', sans-serif;
+  font-weight: 400;
+  line-height: 1.7;
+  font-size: 15px;
+}
+
+/* ── LAYOUT ── */
+.wrap { display: flex; min-height: 100vh; }
+
+/* ── SIDEBAR ── */
+.sidebar {
+  width: 260px;
+  min-height: 100vh;
+  background: var(--bg2);
+  border-right: 1px solid var(--border);
+  position: fixed;
+  top: 0; left: 0;
+  overflow-y: auto;
+  z-index: 100;
+  padding-bottom: 40px;
+}
+.sidebar-brand {
+  padding: 24px 20px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.sidebar-brand .logo {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--red);
+  letter-spacing: 2px;
+  display: block;
+}
+.sidebar-brand .sub {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 3px;
+  letter-spacing: 0.5px;
+}
+.nav-group { padding: 16px 0 0; }
+.nav-group-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--muted2);
+  padding: 0 20px 8px;
+  text-transform: uppercase;
+}
+.nav-item {
+  display: block;
+  padding: 8px 20px;
+  font-size: 13px;
+  color: var(--muted);
+  text-decoration: none;
+  border-left: 2px solid transparent;
+  transition: all 0.15s;
+  cursor: pointer;
+}
+.nav-item:hover { color: var(--text); background: var(--bg3); }
+.nav-item.active { color: var(--text); border-left-color: var(--red); background: var(--red-bg); }
+.nav-item.p1.active { border-left-color: var(--blue); background: var(--blue-bg); }
+.nav-item.p2.active { border-left-color: var(--green); background: var(--green-bg); }
+.nav-item.p3.active { border-left-color: var(--purple); background: var(--purple-bg); }
+.nav-item.p4.active { border-left-color: var(--amber); background: var(--amber-bg); }
+
+/* ── MAIN ── */
+.main {
+  margin-left: 260px;
+  flex: 1;
+  max-width: 860px;
+  padding: 0 48px 80px;
+}
+
+/* ── HERO ── */
+.hero {
+  padding: 60px 0 40px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 48px;
+}
+.hero-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: var(--red);
+  border: 1px solid var(--red);
+  padding: 3px 10px;
+  border-radius: 4px;
+  display: inline-block;
+  margin-bottom: 16px;
+}
+.hero h1 {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 32px;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.2;
+  margin-bottom: 12px;
+  letter-spacing: -0.5px;
+}
+.hero .subtitle {
+  font-size: 15px;
+  color: var(--muted);
+  max-width: 540px;
+  line-height: 1.6;
+}
+.hero-meta {
+  display: flex;
+  gap: 24px;
+  margin-top: 24px;
+  flex-wrap: wrap;
+}
+.hero-meta-item {
+  font-size: 12px;
+  color: var(--muted);
+}
+.hero-meta-item span {
+  color: var(--text);
+  font-weight: 500;
+}
+
+/* ── SECTION ── */
+.part {
+  margin-bottom: 64px;
+}
+.part-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 28px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+.part-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  padding: 4px 10px;
+  border-radius: 4px;
+}
+.p1 .part-num { background: var(--blue-bg); color: var(--blue); border: 1px solid rgba(0,210,255,0.25); }
+.p2 .part-num { background: var(--green-bg); color: var(--green); border: 1px solid rgba(34,197,94,0.25); }
+.p3 .part-num { background: var(--purple-bg); color: var(--purple); border: 1px solid rgba(168,85,247,0.25); }
+.p4 .part-num { background: var(--amber-bg); color: var(--amber); border: 1px solid rgba(245,158,11,0.25); }
+.part-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+}
+
+/* ── CHAPTER ── */
+.ch {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin-bottom: 16px;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+.ch:hover { border-color: var(--border2); }
+.ch-hd {
+  padding: 16px 20px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  user-select: none;
+}
+.ch-hd:hover { background: var(--bg3); }
+.ch-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--muted2);
+  margin-right: 10px;
+}
+.ch-title-wrap { display: flex; align-items: center; flex: 1; }
+.ch-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+.ch-arr {
+  font-size: 10px;
+  color: var(--muted2);
+  transition: transform 0.2s;
+  margin-left: 12px;
+  flex-shrink: 0;
+}
+.ch.open .ch-arr { transform: rotate(90deg); }
+.ch-body {
+  display: none;
+  padding: 20px;
+  border-top: 1px solid var(--border);
+  background: var(--bg3);
+}
+.ch.open .ch-body { display: block; }
+
+/* ── CONTENT ELEMENTS ── */
+.lbl {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  color: var(--muted2);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  margin-top: 20px;
+}
+.lbl:first-child { margin-top: 0; }
+.txt { font-size: 14px; color: var(--muted); line-height: 1.75; }
+.txt b, .txt strong { color: var(--text); font-weight: 600; }
+.ana {
+  background: var(--bg4);
+  border-left: 3px solid var(--blue);
+  border-radius: 0 8px 8px 0;
+  padding: 12px 16px;
+  margin-top: 10px;
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.65;
+}
+.warn-box {
+  background: rgba(245,158,11,0.08);
+  border: 1px solid rgba(245,158,11,0.2);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-top: 10px;
+  font-size: 13px;
+  color: #ca8a04;
+  line-height: 1.65;
+}
+.good-box {
+  background: rgba(34,197,94,0.08);
+  border: 1px solid rgba(34,197,94,0.2);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-top: 10px;
+  font-size: 13px;
+  color: #16a34a;
+  line-height: 1.65;
+}
+.fml {
+  background: var(--bg);
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin-top: 10px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--text);
+  white-space: pre-wrap;
+  line-height: 1.8;
+}
+.fml .c { color: var(--muted); }
+.divider { border: none; border-top: 1px solid var(--border); margin: 18px 0; }
+.ul { list-style: none; margin-top: 10px; }
+.ul li {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 9px;
+  line-height: 1.6;
+}
+.ul li::before { content: "—"; color: var(--muted2); flex-shrink: 0; margin-top: 1px; }
+.ul li b { color: var(--text); font-weight: 600; }
+
+/* ── PILL ── */
+.pl {
+  display: inline-block;
+  font-size: 10px;
+  padding: 1px 7px;
+  border-radius: 20px;
+  margin-right: 4px;
+  font-weight: 600;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+.pb { background: var(--blue-bg); color: var(--blue); }
+.pg { background: var(--green-bg); color: var(--green); }
+.pa { background: var(--amber-bg); color: var(--amber); }
+.pr { background: var(--red-bg); color: var(--red); }
+.pp { background: var(--purple-bg); color: var(--purple); }
+
+/* ── METRIC CARDS ── */
+.mc {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+  margin-top: 14px;
+}
+.mv {
+  background: var(--bg4);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px;
+  text-align: center;
+}
+.mv-n {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+}
+.mv-l {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 4px;
+  line-height: 1.4;
+}
+
+/* ── TABLE ── */
+.tbl-wrap { overflow-x: auto; margin-top: 12px; }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+th {
+  background: var(--bg4);
+  color: var(--muted);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 10px 14px;
+  text-align: left;
+  border-bottom: 1px solid var(--border2);
+}
+td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  color: var(--muted);
+  vertical-align: top;
+  line-height: 1.55;
+}
+td b { color: var(--text); font-weight: 600; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: var(--bg4); }
+
+/* ── FLOW DIAGRAM ── */
+.flow {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 14px;
+  font-size: 13px;
+}
+.flow-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--bg4);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 14px;
+}
+.flow-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--bg2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--muted);
+}
+.flow-arrow {
+  text-align: center;
+  color: var(--muted2);
+  font-size: 12px;
+  padding: 0 16px;
+}
+.flow-text { color: var(--text); flex: 1; }
+.flow-sub { font-size: 11px; color: var(--muted); }
+
+/* ── ACCOUNTING GRID ── */
+.acc-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-top: 14px;
+}
+.acc-card {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.acc-hd {
+  padding: 10px 14px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.acc-hd-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.acc-items { padding: 0; }
+.acc-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 8px 14px;
+  border-top: 1px solid var(--border);
+  font-size: 12px;
+  gap: 8px;
+}
+.acc-item-name { color: var(--muted); line-height: 1.4; }
+.acc-item-ex {
+  font-size: 10px;
+  color: var(--muted2);
+  margin-top: 1px;
+}
+.acc-item-tag { flex-shrink: 0; }
+
+/* ── BALANCE SHEET ── */
+.bs-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-top: 14px;
+}
+.bs-col { }
+.bs-hd {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 1px;
+  padding: 8px 14px;
+  border-radius: 8px 8px 0 0;
+  border: 1px solid var(--border);
+  border-bottom: none;
+}
+.bs-body {
+  border: 1px solid var(--border);
+  border-radius: 0 0 8px 8px;
+}
+.bs-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 14px;
+  font-size: 12px;
+  border-bottom: 1px solid var(--border);
+}
+.bs-row:last-child { border-bottom: none; }
+.bs-name { color: var(--muted); }
+.bs-val { color: var(--text); font-family: 'JetBrains Mono', monospace; font-size: 11px; }
+.bs-total {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 700;
+  background: var(--bg4);
+  border-top: 1px solid var(--border2);
+  margin-top: 2px;
+  border-radius: 0 0 8px 8px;
+}
+
+/* ── CALC ── */
+.cr { display: flex; gap: 12px; align-items: center; margin-bottom: 10px; flex-wrap: wrap; }
+.cr label { font-size: 12px; color: var(--muted); min-width: 150px; }
+.cr input[type=range] { flex: 1; min-width: 120px; accent-color: var(--red); }
+.cr span { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--text); min-width: 90px; }
+
+/* ── DISCLAIMER ── */
+.disclaimer {
+  margin-top: 64px;
+  padding: 16px 20px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {
+  .sidebar { display: none; }
+  .main { margin-left: 0; padding: 0 20px 60px; }
+  .acc-grid, .bs-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="sidebar-brand">
+    <span class="logo">QUANT ORG</span>
+    <div class="sub">Finance 101 — Manual Guide v1.0</div>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-group-title">คู่มือ</div>
+    <a class="nav-item" onclick="scrollTo('hero')">บทนำ</a>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-group-title">Part 1 — พื้นฐานการเงิน</div>
+    <a class="nav-item p1" onclick="scrollTo('p1-1')">1.1 Time Value of Money</a>
+    <a class="nav-item p1" onclick="scrollTo('p1-2')">1.2 Compound Interest</a>
+    <a class="nav-item p1" onclick="scrollTo('p1-3')">1.3 เงินเฟ้อ & Real Return</a>
+    <a class="nav-item p1" onclick="scrollTo('p1-4')">1.4 Asset Classes</a>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-group-title">Part 2 — บัญชีส่วนบุคคล</div>
+    <a class="nav-item p2" onclick="scrollTo('p2-1')">2.1 รายรับ (Income)</a>
+    <a class="nav-item p2" onclick="scrollTo('p2-2')">2.2 รายจ่าย (Expense)</a>
+    <a class="nav-item p2" onclick="scrollTo('p2-3')">2.3 ทรัพย์สิน (Asset)</a>
+    <a class="nav-item p2" onclick="scrollTo('p2-4')">2.4 หนี้สิน (Liability)</a>
+    <a class="nav-item p2" onclick="scrollTo('p2-5')">2.5 งบดุลส่วนบุคคล</a>
+    <a class="nav-item p2" onclick="scrollTo('p2-6')">2.6 Cash Flow Statement</a>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-group-title">Part 3 — การออม</div>
+    <a class="nav-item p3" onclick="scrollTo('p3-1')">3.1 กรอบ 50/30/20</a>
+    <a class="nav-item p3" onclick="scrollTo('p3-2')">3.2 กองทุนฉุกเฉิน</a>
+    <a class="nav-item p3" onclick="scrollTo('p3-3')">3.3 DCA</a>
+    <a class="nav-item p3" onclick="scrollTo('p3-4')">3.4 คำนวณเป้าหมาย</a>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-group-title">Part 4 — บริหารความเสี่ยง</div>
+    <a class="nav-item p4" onclick="scrollTo('p4-1')">4.1 Risk Taxonomy</a>
+    <a class="nav-item p4" onclick="scrollTo('p4-2')">4.2 Risk Metrics</a>
+    <a class="nav-item p4" onclick="scrollTo('p4-3')">4.3 Position Sizing</a>
+    <a class="nav-item p4" onclick="scrollTo('p4-4')">4.4 Diversification</a>
+    <a class="nav-item p4" onclick="scrollTo('p4-5')">4.5 Expectancy & R:R</a>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<main class="main">
+
+<!-- HERO -->
+<div class="hero" id="hero">
+  <div class="hero-badge">QUANT TRADING RESEARCH</div>
+  <h1>Finance 101<br>Manual Guide</h1>
+  <p class="subtitle">คู่มือพื้นฐานการเงิน การออม และบริหารความเสี่ยง ฉบับ Quant — วัดผลได้ทุกตัวเลข ไม่ใช้ความรู้สึกตัดสิน</p>
+  <div class="hero-meta">
+    <div class="hero-meta-item">Version <span>1.0</span></div>
+    <div class="hero-meta-item">Updated <span>April 2026</span></div>
+    <div class="hero-meta-item">หัวข้อ <span>4 หมวด / 19 บท</span></div>
+    <div class="hero-meta-item">สำหรับ <span>มือใหม่ถึงระดับกลาง</span></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     PART 1 — พื้นฐานการเงิน
+═══════════════════════════════════════════ -->
+<div class="part p1">
+  <div class="part-header">
+    <span class="part-num">PART 01</span>
+    <span class="part-title">พื้นฐานการเงิน (Financial Fundamentals)</span>
+  </div>
+
+  <!-- 1.1 -->
+  <div class="ch open" id="p1-1">
+    <div class="ch-hd" onclick="tog(this)">
+      <div class="ch-title-wrap"><span class="ch-num">1.1</span><span class="ch-title">มูลค่าของเงินตามเวลา (Time Value of Money)</span></div>
+      <span class="ch-arr">▶</span>
+    </div>
+    <div class="ch-body">
+      <div class="lbl">หลักการ</div>
+      <div class="txt">เงิน 100 บาทวันนี้ <b>มีมูลค่ามากกว่า</b> เงิน 100 บาทในอนาคต เพราะเงินวันนี้สามารถนำไปลงทุนสร้างผลตอบแทนได้ทันที</div>
+      <div class="ana">🐻 เปรียบเหมือนเมล็ดพืช — ปลูกวันนี้ให้ผลก่อน ยิ่งรอปลูกนาน ยิ่งเสียโอกาสเก็บเกี่ยว</div>
+      <div class="divider"></div>
+      <div class="lbl">สูตรหลัก</div>
+      <div class="fml">FV = PV × (1 + r)^n
+PV = FV / (1 + r)^n
+
+<span class="c">FV = มูลค่าอนาคต | PV = มูลค่าปัจจุบัน
+r  = อัตราผลตอบแทน/ปี | n = จำนวนปี</span></div>
+      <div class="divider"></div>
+      <div class="lbl">ทดลองคำนวณ</div>
+      <div class="cr"><label>เงินต้น (PV)</label><input type="range" min="1000" max="100000" step="1000" value="10000" id="pv" oninput="cFV()"><span id="pvo">฿10,000</span></div>
+      <div class="cr"><label>ผลตอบแทน/ปี (%)</label><input type="range" min="1" max="20" step="0.5" value="7" id="rt" oninput="cFV()"><span id="rto">7.0%</span></div>
+      <div class="cr"><label>จำนวนปี</label><input type="range" min="1" max="40" step="1" value="10" id="yr" oninput="cFV()"><span id="yro">10 ปี</span></div>
+      <div class="mc">
+        <div class="mv"><div class="mv-n" id="fvo">฿19,672</div><div class="mv-l">มูลค่าอนาคต (FV)</div></div>
+        <div class="mv"><div class="mv-n" id="gno" style="color:var(--green)">฿9,672</div><div class="mv-l">กำไรสะสม</div></div>
+        <div class="mv"><div class="mv-n" id="xo">×1.97</div><div class="mv-l">ทวีคูณเงินต้น</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1.2 -->
+  <div class="ch" id="p1-2">
+    <div class="ch-hd" onclick="tog(this)">
+      <div class="ch-title-wrap"><span class="ch-num">1.2</span><span class="ch-title">ดอกเบี้ยทบต้น (Compound Interest) และกฎ 72</span></div>
+      <span class="ch-arr">▶</span>
+    </div>
+    <div class="ch-body">
+      <div class="txt">ดอกเบี้ยที่ได้รับถูกนำกลับมาลงทุนซ้ำ ทำให้ฐานเงินต้นขยายตัวแบบ Exponential — Einstein เรียกมันว่า <b>"สิ่งมหัศจรรย์อันดับ 8 ของโลก"</b></div>
+      <div class="ana">🐻 เหมือนลูกบอลหิมะกลิ้งลงเขา — ยิ่งกลิ้งยิ่งใหญ่ขึ้นเอง</div>
+      <div class="divider"></div>
+      <div class="lbl">กฎ 72 — เงินเพิ่ม 2 เท่าในกี่ปี</div>
+      <div class="fml">ปีที่เงินเพิ่ม 2 เท่า ≈ 72 ÷ อัตราผลตอบแทน (%)
+<span class="c">ตัวอย่าง: 8%/ปี → 72÷8 = 9 ปี เงินเพิ่ม 2 เท่า</span></div>
+      <div class="divider"></div>
+      <div class="lbl">ลงทุน ฿10,000 ที่ 8%/ปี</div>
+      <div class="mc">
+        <div class="mv"><div class="mv-n">฿14,693</div><div class="mv-l">5 ปี (+47%)</div></div>
+        <div class="mv"><div class="mv-n">฿21,589</div><div class="mv-l">10 ปี (+116%)</div></div>
+        <div class="mv"><div class="mv-n">฿46,610</div><div class="mv-l">20 ปี (+366%)</div></div>
+        <div class="mv"><div class="mv-n">฿217,245</div><div class="mv-l">40 ปี (+2,072%)</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1.3 -->
+  <div class="ch" id="p1-3">
+    <div class="ch-hd" onclick="tog(this)">
+      <div class="ch-title-wrap"><span class="ch-num">1.3</span><span class="ch-title">เงินเฟ้อ (Inflation) และผลตอบแทนที่แท้จริง</span></div>
+      <span class="ch-arr">▶</span>
+    </div>
+    <div class="ch-body">
+      <div class="txt">เงินเฟ้อคือ <b>ศัตรูเงียบ</b> ที่กัดกินกำลังซื้อทุกปี ผลตอบแทนที่แท้จริง (Real Return) สำคัญกว่าตัวเลขที่เห็น</div>
+      <div class="ana">🐻 เหมือนวิ่งบนสายพาน — ต้องวิ่งเร็วกว่าสายพานก่อน ถึงจะก้าวหน้าจริง</div>
+      <div class="divider"></div>
+      <div class="lbl">Fisher Equation</div>
+      <div class="fml">Real Return ≈ Nominal Return − Inflation Rate
+
+<span class="c">ตัวอย่าง: บัญชีออมทรัพย์ 1.5%/ปี | เงินเฟ้อ 3%/ปี
+Real Return = 1.5% − 3% = −1.5%/ปี (มูลค่าจริงหดทุกปี)</span></div>
+      <div class="divider"></div>
+      <div class="lbl">สินทรัพย์กับการป้องกันเงินเฟ้อ</div>
+      <ul class="ul">
+        <li><span class="pl pg">ป้องกันได้ดี</span> หุ้น, อสังหาริมทรัพย์, สินค้าโภคภัณฑ์, TIPS</li>
+        <li><span class="pl pa">บางส่วน</span> พันธบัตรระยะสั้น, ทองคำ</li>
+        <li><span class="pl pr">ป้องกันได้น้อย</span> บัญชีออมทรัพย์, เงินสด, พันธบัตรระยะยาวอัตราดอกเบี้ยคงที่</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 1.4 -->
+  <div class="ch" id="p1-4">
+    <div class="ch-hd" onclick="tog(this)">
+      <div class="ch-title-wrap"><span class="ch-num">1.4</span><span class="ch-title">ประเภทสินทรัพย์ (Asset Classes) และ EMH</span></div>
+      <span class="ch-arr">▶</span>
+    </div>
+    <div class="ch-body">
+      <div class="tbl-wrap">
+        <table>
+          <tr><th>Risk Level</th><th>สินทรัพย์</th><th>ลักษณะ</th></tr>
+          <tr><td><span class="pl pb">ต่ำ</span></td><td>เงินฝาก, พันธบัตรรัฐ</td><td>ผลตอบแทนต่ำ แน่นอน</td></tr>
+          <tr><td><span class="pl pg">ปานกลาง</span></td><td>หุ้นกู้, กองทุนรวม, REITs</td><td>สมดุล Risk/Return</td></tr>
+          <tr><td><span class="pl pa">สูง</span></td><td>หุ้นรายตัว, Growth stocks</td><td>ผันผวนสูง โอกาสสูง</td></tr>
+          <tr><td><span class="pl pr">สูงมาก</span></td><td>Derivatives, Crypto, Forex Leveraged, CFD</td><td>ต้องการ Edge ชัดเจน</td></tr>
+        </table>
+      </div>
+      <div class="divider"></div>
+      <div class="lbl">Efficient Market Hypothesis (EMH)</div>
+      <div class="txt">ในตลาดที่มีประสิทธิภาพ ราคาสะท้อนข้อมูลทั้งหมดแล้ว Alpha ที่ยั่งยืนต้องมาจาก Edge ทางสถิติที่พิสูจน์ได้ ไม่ใช่ความเชื่อหรือ Gut Feeling</div>
+      <div class="good-box">✅ Quant Principle: วัดผลได้ก่อน เชื่อทีหลัง</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     PART 2 — บัญชีส่วนบุคคล
+═══════════════════════════════════════════ -->
+<div class="part p2">
+  <div class="part-header">
+    <span class="part-num">PART 02</span>
+    <span class="part-title">บัญชีส่วนบุคคล (Personal Accounting)</span>
+  </div>
+
+  <!-- 2.1 รายรับ -->
+  <div class="ch" id="p2-1">
+    <div class="ch-hd" onclick="tog(this)">
+      <div class="ch-title-wrap"><span class="ch-num">2.1</span><span class="ch-title">รายรับ (Income) — แหล่งเงินเข้า</span></div>
+      <span class="ch-arr">▶</span>
+    </div>
+    <div class="ch-body">
+      <div class="txt">รายรับคือเงินที่ <b>ไหลเข้า</b> ในช่วงเวลาหนึ่ง แบ่งเป็น 3 ประเภทหลักตามหลักการทางภาษีและการเงินส่วนบุคคล</div>
+      <div class="divider"></div>
+      <div class="acc-grid">
+        <div class="acc-card">
+          <div class="acc-hd" style="background:rgba(34,197,94,0.08);color:var(--green)">
+            <div class="acc-hd-dot" style="background:var(--green)"></div>
+            ACTIVE INCOME — รายรับเชิงรับ
+          </div>
+          <div class="acc-items">
+            <div class="acc-item">
+              <div><div class="acc-item-name"><b>เงินเดือน / ค่าจ้าง</b></div><div class="acc-item-ex">ต้องแลกเวลาและแรงงาน หยุดทำงาน = หยุดได้</div></div>
+              <div class="acc-item-tag"><span class="pl pg">หลัก</span></div>
+            </div>
+            <div class="acc-item">
+              <div><div class="acc-item-name"><b>Freelance / รับจ้างรายโปรเจกต์</b></div><div class="acc-item-ex">ยืดหยุ่นกว่า แต่ผันผวน ไม่มีสวัสดิการ</div></div>
+              <div class="acc-item-tag"><span class="pl pg">เสริม</span></div>
+            </div>
+            <div class="acc-item">
+              <div><div class="acc-item-name"><b>ธุรกิจ / กิจการส่วนตัว</b></div><div class="acc-item-ex">ใช้เวลามาก แต่ Upside ไม่จำกัด</div></div>
+              <div class="acc-item-tag"><span class="pl pg">เสริม</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="acc-card">
+          <div class="acc-hd" style="background:rgba(0,210,255,0.08);color:var(--blue)">
+            <div class="acc-hd-dot" style="background:var(--blue)"></div>
+            PASSIVE INCOME — รายรับเชิงรุก
+          </div>
+          <div class="acc-items">
+            <div class="acc-item">
+              <div><div class="acc-item-name"><b>ดอกเบี้ย / เงินปันผล</b></div><div class="acc-item-ex">จากเงินออม พันธบัตร หุ้นปันผล กองทุน</div></div>
+              <div class="acc-item-tag"><span class="pl pb">สินทรัพย์</span></div>
+            </div>
+            <div class="acc-item">
+              <div><div class="acc-item-name"><b>ค่าเช่าทรัพย์สิน</b></div><div class="acc-item-ex">อสังหาริมทรัพย์, ยานพาหนะ, อุปกรณ์</div></div>
+              <div class="acc-item-tag"><span class="pl pb">สินทรัพย์</span></div>
+            </div>
+            <div class="acc-item">
+              <div><div class="acc-item-name"><b>Royalty / IP Income</b></div><div class="acc-item-ex">หนังสือ, ซอฟต์แวร์, สิทธิบัตร, Content</div></div>
+              <div class="acc-item-tag"><span class="pl pb">สินทรัพย์</span></div>
+            </div>
+            <div class="acc-item">
+              <div><div class="acc-item-name"><b>Capital Gain</b></div><div class="acc-item-ex">กำไรจากการขายสินทรัพย์ที่ราคาสูงขึ้น</div></div>
+              <div class="acc-item-tag"><span class="pl pb">ลงทุน</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div class="lbl">หลักคิด Quant เกี่ยวกับรายรับ</div>
+      <ul class="ul">
+        <li><b>Diversify Income Streams:</b> อย่าพึ่งแหล่งรายรับเดียว เช่นเดียวกับการกระจายพอร์ต</li>
+        <li><b>Passive &gt; Active:</b> Passive Income ทำงานแทนคุณตลอด 24/7 ไม่ต้องแลกเวลา</li>
+        <li><b>Track Net Income:</b> รายรับที่สำคัญคือ <b>หลังหักภาษี</b> ไม่ใช่ก่อน</li>
+        <li><b>Income Stability Score:</b> วัดความผันผวนของรายรับเหมือน Volatility ของสินทรัพย์</li>
+      </ul>
+      <div class="good-box">✅ เป้าหมายระยะยาว: Passive Income ≥ Monthly Expenses = Financial Independence</div>
+    </div>
+  </div>
+
+  <!-- 2.2 รายจ่าย -->
+  <div class="ch" id="p2-2">
+    <div class="ch-hd" onclick="tog(this)">
+      <div class="ch-title-wrap"><span class="ch-num">2.2</span><span class="ch-title">รายจ่าย (Expense) — แหล่งเงินออก</span></div>
+      <span class="ch-arr">▶</span>
+    </div>
+    <div class="ch-body">
+      <div class="txt">รายจ่ายคือเงินที่ <b>ไหลออก</b> แบ่งตาม Priority และลักษณะการเกิดซ้ำ การรู้ว่าจ่ายอะไรคือก้าวแรกของการควบคุม</div>
+      <div class="divider"></div>
+      <div class="acc-grid">
+        <div class="acc-card">
+          <div class="acc-hd" style="background:rgba(233,69,96,0.08);color:var(--red)">
+            <div class="acc-hd-dot" style="background:var(--red)"></div>
+            FIXED EXPENSE — รายจ่ายคงที่
+          </div>
+          <div class="acc-items">
+            <div class="acc-item">
+              <div><div class="acc-item-name"><b>ค่าเช่า / ผ่อนบ้าน</b></div><div class="acc-item-ex">Housing — สูงสุดไม่ควรเกิน 30% ของรายรับ</div></div>
+              <div class="acc-item-tag"><span class="pl pr">Need</span></div>
+            </div>
+            <div class="acc-item">
+              <div><div class="acc-item-name"><b>ผ่อนรถ / Loan ต่างๆ</b></div><div class="acc-item-ex">Debt Service — ชำระหนี้ตามสัญญา</div></div>
+              <div class="acc-item-tag"><span class="pl pr">Need</span></div>
+            </div>
+            <div class="acc-item">
+              <div><div class="acc-item-name"><b>ประกัน (ชีวิต, สุขภาพ, รถ)</b></div><div class="acc-item-ex">ค่า Premium รายเดือน/รายปี</div></div>
+              <div class="acc-item-tag"><span class="pl pr">Need</span></div>
+            </div>
+            <div class="acc-item">
+              <div><div class="acc-item-name"><b>Subscription ที่จำเป็น</b></div><div class="acc-item-ex">Software, Internet, โทรศัพท์</div></div>
+              <div class="acc-item-tag"><span class="pl pr">Need</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="acc-card">
+          <div class="acc-hd" style="background:rgba(245,158,11,0.08);color:var(--amber)">
+            <div class="acc-hd-dot" style="background:var(--amber)"></div>
+            VARIABLE EXPENSE — รายจ่ายผันแปร
+          </div>
+          <div class="acc-items">
+            <div class="acc-item">
+              <div><div class="acc-item-name"><b>ค่าอาหาร / กินข้าว</b></div><div class="acc-item-ex">ทำเองถูกกว่า กินนอกบ้านแพงกว่า</div></div>
+              <div class="acc-item-tag"><span class="pl pr">Need</span></div>
+            </div>
+            <div class="acc-item">
+              <div><div class="acc-item-name"><b>ค่าเดินทาง / น้ำมัน</b></div><div class="acc-item-ex">ผันแปรตามระยะทางและพฤติกรรม</div></div>
+              <div class="acc-item-tag"><span class="pl pr">Need</span></div>
+            </div>
+            <div class="acc-item">
+              <div><div class="acc-item-name"><b>บันเทิง / ท่องเที่ยว</b></div><div class="acc-item-ex">ควบคุมได้ ตัดลดได้หากจำเป็น</div></div>
+              <div class="acc-item-tag"><span class="pl pa">Want</span></div>
+            </div>
+            <div class="acc-item">
+              <div><div class="acc-item-name"><b>เสื้อผ้า / ของใช้ส่วนตัว</b></div><div class="acc-item-ex">ควบคุมได้ตามวินัย</div></div>
+              <div class="acc-item-tag"><span class="pl pa">Want</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div class="lbl">รายจ่ายที่มองข้าม (Hidden Expenses)</div>
+      <ul class="ul">
+        <li><b>Lifestyle Inflation:</b> รายรับเพิ่ม → รายจ่ายเพิ่มตาม ทั้งที่ไม่จำเป็น ป้องกันด้วยการออมก่อนใช้</li>
+        <li><b>Subscription Creep:</b> Subscription เล็กน้อยหลายตัว สะสมเป็นเงินก้อนใหญ่ทบทวนทุก 6 เดือน</li>
+        <li><b>Opportunity Cost:</b> ทุกบาทที่จ่ายคือ บาทที่ไม่ได้ลงทุน คิดเสมอว่า "ถ้าเอาไปลงทุน 20 ปี จะเป็นเท่าไหร่"</li>
+        <li><b>Emergency Expenses:</b> ซ่อมบ้าน ซ่อมรถ เจ็บป่วย — ควรมีกองทุนฉุกเฉินรองรับ</li>
+      </ul>
+      <div class="warn-box">⚠️ กฎ Parkinson: รายจ่ายจะขยายตามรายรับที่มีอยู่เสมอ ถ้าไม่มีวินัยออมก่อน</div>
+    </div>
+  </div>
+
+  <!-- 2.3 ทรัพย์สิน -->
+  <div class="ch" id="p2-3">
+    <div class="ch-hd" onclick="tog(this)">
+      <div class="ch-title-wrap"><span class="ch-num">2.3</span><span class="ch-title">ทรัพย์สิน (Asset) — สิ่งที่ใส่เงินเข้ากระเป๋า</span></div>
+      <span class="ch-arr">▶</span>
+    </div>
+    <div class="ch-body">
+      <div class="txt">ทรัพย์สินคือสิ่งที่ <b>มีมูลค่า</b> และสามารถแปลงเป็นเงินได้ ในเชิง Quant เราแบ่งตาม Liquidity และ Return Potential</div>
+      <div class="ana">🐻 Robert Kiyosaki: "ทรัพย์สินจริงคือสิ่งที่ใส่เงินเข้ากระเป๋าคุณ" — บ้านที่อยู่เองไม่ใช่ทรัพย์สิน แต่บ้านที่ปล่อยเช่าคือทรัพย์สิน</div>
+      <div class="divider"></div>
+      <div class="lbl">แบ่งตาม Liquidity (สภาพคล่อง)</div>
+      <div class="acc-grid">
+        <div class="acc-card">
+          <div class="acc-hd" style="background:rgba(0,210,255,0.08);color:var(--blue)">
+            <div class="acc-hd-dot" style="background:var(--blue)"></div>
+            LIQUID ASSETS — สภาพคล่องสูง
+          </div>
+          <div class="acc-items">
+            <div class="acc-item">
+              <div><div class="acc-item-name"><b>เงินสด / เงินในกระเป๋า</b></div><div class="acc-item-ex">สภาพคล่อง 100% แต่ไม่งอกเงย</div></div>
+              <div class="acc-item-tag"><span class="pl pb">D+0</span></div>
+            </div>
+            <div class="acc-item">
+              <div><div class="acc-item-name"><b>บัญชีออมทรัพย์ / เงินฝาก</b></div><div class="acc-item-ex">ถอนได้ทันที ดอกเบี้ยต่ำ</div></div>
+              <div class="acc-item-tag"><span class="pl pb">D+0</span></div>
+            </div>
+            <div class="acc-item">
+              <div><div class="acc-item-name"><b>กองทุน Money Market</b></div><div class="acc-item-ex">ถอนได้ T+1 ผลตอบแทนดีกว่าออมทรัพย์</div></div>
+              <div class="acc-item-tag"><span class="pl pb">D+1</span></div>
+            </div>
+            <div class="acc-item">
+              <div><div class="acc-item-name"><b>หุ้น / ETF ในตลาด</b></div><div class="acc-item-ex">ขายได้ทุกวันทำการ T+2</div></div>
+              <div class="acc-item-tag"><span class="pl pb">D+2</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="acc-card">
+          <div class="acc-hd" style="background:rgba(168,85,247,0.08);color:var(--purple)">
+            <div class="acc-hd-dot" style="background:var(--purple)"></div>
+            ILLIQUID ASSETS — สภาพคล่องต่ำ
+          </div>
+          <div class="acc-items">
+            <div class="acc-item">
+              <div><div class="acc-item-name"><b>อสังหาริมทรัพย์</b></div><div class="acc-item-ex">บ้าน คอนโด ที่ดิน ขายใช้เวลาเป็นเดือน</div></div>
+              <div class="acc-item-tag"><span class="pl pp">เดือน</span></div>
+            </div>
+            <div class="acc-item">
+              <div><div class="acc-item-name"><b>ธุรกิจ / กิจการ</b></div><div class="acc-item-ex">ขายยาก ต้องหาผู้ซื้อที่เหมาะ</div></div>
+              <div class="acc-item-tag"><span class="pl pp">ปี</span></div>
+            </div>
+            <div class="acc-item">
+              <div><div class="acc-item-name"><b>Private Equity / Venture</b></div><div class="acc-item-ex">Lock-up period 5-10 ปี</div></div>
+              <div class="acc-item-tag"><span class="pl pp">ปี</span></div>
+            </div>
+            <div class="acc-item">
+              <div><div class="acc-item-name"><b>สินทรัพย์สะสม / ของมีค่า</b></div><div class="acc-item-ex">ทอง เพชร นาฬิกา ศิลปะ รถคลาสสิก</div></div>
+              <div class="acc-item-tag"><span class="pl pp">ผันแปร</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div class="lbl">ประเภทตาม Return Potential</div>
+      <div class="tbl-wrap">
+        <table>
+          <tr><th>ประเภท</th><th>ตัวอย่าง</th><th>Expected Return/ปี</th><th>Liquidity</th></tr>
+          <tr><td><b>Cash & Equivalent</b></td><td>เงินฝาก, MMF</td><td>1–3%</td><td>สูงมาก</td></tr>
+          <tr><td><b>Fixed Income</b></td><td>พันธบัตร, หุ้นกู้</td><td>3–6%</td><td>ปานกลาง</td></tr>
+          <tr><td><b>Equity</b></td><td>หุ้น, ETF</td><td>7–12% (long-term)</td><td>สูง</td></tr>
+          <tr><td><b>Real Estate</b></td><td>บ้าน คอนโด</td><td>5–10% (รวมค่าเช่า)</td><td>ต่ำ</td></tr>
+          <tr><td><b>Alternative</b></td><td>Crypto, Commodities</td><td>ผันผวนสูงมาก</td><td>ผันแปร</td></tr>
+        </table>
+      </div>
+      <div class="warn-box">⚠️ สิ่งที่คนเรียกว่า "ทรัพย์สิน" แต่จริงๆ คือ Liability: รถส่วนตัว (ค่าน้ำมัน ซ่อม ประกัน), บ้านที่อยู่เอง (ค่าซ่อม ดอกเบี้ย)</div>
+    </div>
+  </div>
+
+  <!-- 2.4 หนี้สิน -->
+  <div class="ch" id="p2-4">
+    <div class="ch-hd" onclick="tog(this)">
+      <div class="ch-title-wrap"><span class="ch-num">2.4</span><span class="ch-title">หนี้สิน (Liability) — ภาระที่ดึงเงินออกไป</span></div>
+      <span class="ch-arr">▶</span>
+    </div>
+    <div class="ch-body">
+      <div class="txt">หนี้สินคือ <b>ภาระทางการเงิน</b> ที่ต้องชำระในอนาคต ไม่ใช่หนี้ทุกอย่างที่แย่ — หนี้ที่ดีสร้างทรัพย์สิน หนี้ที่แย่สร้างรายจ่าย</div>
+      <div class="divider"></div>
+      <div class="acc-grid">
+        <div class="acc-card">
+          <div class="acc-hd" style="background:rgba(34,197,94,0.08);color:var(--green)">
+            <div class="acc-hd-dot" style="background:var(--green)"></div>
+            GOOD DEBT — หนี้ที่สร้างมูลค่า
+          </div>
+          <div class="acc-items">
+            <div class="acc-item">
+              <div><div class="acc-item-name"><b>สินเชื่อบ้าน (Mortgage)</b></div><div class="acc-item-ex">ดอกเบี้ยต่ำ สร้างสินทรัพย์ที่มีมูลค่า ลดหย่อนภาษีได้</div></div>
+              <div class="acc-item-tag"><span class="pl pg">3–5%</span></div>
+            </div>
+            <div class="acc-item">
+              <div><div class="acc-item-name"><b>สินเชื่อเพื่อการศึกษา</b></div><div class="acc-item-ex">ลงทุนในตัวเอง เพิ่มรายรับระยะยาว</div></div>
+              <div class="acc-item-tag"><span class="pl pg">ต่ำ</span></div>
+            </div>
+            <div class="acc-item">
+              <div><div class="acc-item-name"><b>สินเชื่อธุรกิจ</b></div><div class="acc-item-ex">ใช้ Leverage สร้าง ROI ที่สูงกว่าดอกเบี้ย</div></div>
+              <div class="acc-item-tag"><span class="pl pg">ผันแปร</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="acc-card">
+          <div class="acc-hd" style="background:rgba(233,69,96,0.08);color:var(--red)">
+            <div class="acc-hd-dot" style="background:var(--red)"></div>
+            BAD DEBT — หนี้ที่ทำลายมูลค่า
+          </div>
+          <div class="acc-items">
+            <div class="acc-item">
+              <div><div class="acc-item-name"><b>บัตรเครดิตที่ไม่ชำระเต็ม</b></div><div class="acc-item-ex">ดอกเบี้ย 18–28%/ปี ทบต้นทำลายพอร์ต</div></div>
+              <div class="acc-item-tag"><span class="pl pr">18–28%</span></div>
+            </div>
+            <div class="acc-item">
+              <div><div class="acc-item-name"><b>สินเชื่อส่วนบุคคลอัตราสูง</b></div><div class="acc-item-ex">ไม่มีหลักประกัน ดอกเบี้ยสูง</div></div>
+              <div class="acc-item-tag"><span class="pl pr">15–25%</span></div>
+            </div>
+            <div class="acc-item">
+              <div><div class="acc-item-name"><b>สินเชื่อรถยนต์</b></div><div class="acc-item-ex">รถเสื่อมค่า 15–20%/ปี แต่ยังต้องผ่อน</div></div>
+              <div class="acc-item-tag"><span class="pl pr">3–8%</span></div>
+            </div>
+            <div class="acc-item">
+              <div><div class="acc-item-name"><b>หนี้นอกระบบ</b></div><div class="acc-item-ex">ดอกเบี้ยเกินกฎหมาย หลีกเลี่ยงเด็ดขาด</div></div>
+              <div class="acc-item-tag"><span class="pl pr">อันตราย</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div class="lbl">หลัก Debt Management</div>
+      <ul class="ul">
+        <li><b>Debt Avalanche (แนะนำ):</b> ชำระหนี้ดอกเบี้ยสูงสุดก่อน ประหยัดดอกเบี้ยสูงสุดในระยะยาว</li>
+        <li><b>Debt Snowball:</b> ชำระหนี้ยอดน้อยสุดก่อน สร้าง Momentum ทางจิตวิทยา</li>
+        <li><b>DTI Ratio (Debt-to-Income):</b> หนี้สินทั้งหมดต่อเดือนไม่ควรเกิน 36% ของรายรับ</li>
+        <li><b>ดอกเบี้ยหนี้ &gt; ผลตอบแทนลงทุน:</b> ชำระหนี้ก่อนลงทุน เพราะหนี้ดอกเบี้ยสูงเป็น "ผลตอบแทนลบ" ที่แน่นอน</li>
+      </ul>
+      <div class="fml">DTI Ratio = ยอดผ่อนชำระต่อเดือน / รายรับต่อเดือน × 100%
+<span class="c">เกณฑ์: &lt;36% = ปลอดภัย | 36–50% = ระวัง | &gt;50% = อันตราย</span></div>
+    </div>
+  </div>
+
+  <!-- 2.5 งบดุลส่วนบุคคล -->
+  <div class="ch" id="p2-5">
+    <div class="ch-hd" onclick="tog(this)">
+      <div class="ch-title-wrap"><span class="ch-num">2.5</span><span class="ch-title">งบดุลส่วนบุคคล (Personal Balance Sheet)</span></div>
+      <span class="ch-arr">▶</span>
+    </div>
+    <div class="ch-body">
+      <div class="txt">งบดุลส่วนบุคคล = ภาพ <b>"ณ วันนี้คุณมีอะไร"</b> ไม่ใช่รายเดือน แต่เป็นสแนปช็อตของความมั่งคั่งสุทธิ</div>
+      <div class="fml">Net Worth = Total Assets − Total Liabilities
+<span class="c">มูลค่าสุทธิ = ทรัพย์สินทั้งหมด − หนี้สินทั้งหมด
+
+เป้าหมาย: Net Worth เพิ่มขึ้นทุกปี</span></div>
+      <div class="divider"></div>
+      <div class="lbl">ตัวอย่างงบดุลส่วนบุคคล</div>
+      <div class="bs-grid">
+        <div class="bs-col">
+          <div class="bs-hd" style="background:var(--green-bg);color:var(--green)">ASSETS — ทรัพย์สิน</div>
+          <div class="bs-body">
+            <div class="bs-row"><span class="bs-name">บัญชีออมทรัพย์</span><span class="bs-val">฿150,000</span></div>
+            <div class="bs-row"><span class="bs-name">กองทุนฉุกเฉิน (MMF)</span><span class="bs-val">฿90,000</span></div>
+            <div class="bs-row"><span class="bs-name">พอร์ตหุ้น / กองทุน LTF/RMF</span><span class="bs-val">฿320,000</span></div>
+            <div class="bs-row"><span class="bs-name">กองทุนสำรองเลี้ยงชีพ (PVD)</span><span class="bs-val">฿180,000</span></div>
+            <div class="bs-row"><span class="bs-name">คอนโด (มูลค่าตลาด)</span><span class="bs-val">฿2,500,000</span></div>
+          </div>
+          <div class="bs-total"><span style="color:var(--green)">รวมทรัพย์สิน</span><span style="color:var(--green);font-family:'JetBrains Mono',monospace">฿3,240,000</span></div>
+        </div>
+        <div class="bs-col">
+          <div class="bs-hd" style="background:var(--red-bg);color:var(--red)">LIABILITIES — หนี้สิน</div>
+          <div class="bs-body">
+            <div class="bs-row"><span class="bs-name">ยอดจำนองคอนโดคงเหลือ</span><span class="bs-val">฿1,800,000</span></div>
+            <div class="bs-row"><span class="bs-name">สินเชื่อรถยนต์คงเหลือ</span><span class="bs-val">฿280,000</span></div>
+            <div class="bs-row"><span class="bs-name">บัตรเครดิต (ยอดค้างชำระ)</span><span class="bs-val">฿15,000</span></div>
+            <div class="bs-row"><span class="bs-name">—</span><span class="bs-val">—</span></div>
+            <div class="bs-row"><span class="bs-name">—</span><span class="bs-val">—</span></div>
+          </div>
+          <div class="bs-total"><span style="color:var(--red)">รวมหนี้สิน</span><span style="color:var(--red);font-family:'JetBrains Mono',monospace">฿2,095,000</span></div>
+        </div>
+      </div>
+      <div style="margin-top:12px;background:var(--bg4);border:1px solid var(--border2);border-radius:8px;padding:14px 16px;display:flex;justify-content:space-between;align-items:center">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--muted)">NET WORTH (มูลค่าสุทธิ)</span>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;color:var(--green)">฿1,145,000</span>
+      </div>
+      <div class="divider"></div>
+      <div class="lbl">KPI ที่ควรติดตาม</div>
+      <ul class="ul">
+        <li><b>Net Worth Growth Rate:</b> มูลค่าสุทธิเพิ่มขึ้นเฉลี่ยกี่ % ต่อปี</li>
+        <li><b>Savings Rate:</b> ออม/ลงทุนกี่ % ของรายรับ (เป้าหมาย ≥ 20%)</li>
+        <li><b>Liquidity Ratio:</b> Liquid Assets / Monthly Expenses ≥ 6 เดือน</li>
+        <li><b>Solvency Ratio:</b> Total Assets / Total Liabilities ควร &gt; 2.0</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 2.6 Cash Flow -->
+  <div class="ch" id="p2-6">
+    <div class="ch-hd" onclick="tog(this)">
+      <div class="ch-title-wrap"><span class="ch-num">2.6</span><span class="ch-title">Cash Flow Statement — งบกระแสเงินสดส่วนบุคคล</span></div>
+      <span class="ch-arr">▶</span>
+    </div>
+    <div class="ch-body">
+      <div class="txt">งบกระแสเงินสด = ภาพ <b>"เดือนนี้เงินไปไหน"</b> เป็น Dynamic ต่างจากงบดุลที่เป็น Static</div>
+      <div class="fml">Net Cash Flow = Total Income − Total Expense
+<span class="c">ถ้า &gt; 0 = เงินเหลือ นำไปลงทุนหรือออมได้
+ถ้า &lt; 0 = ขาดเงิน ต้องตัดรายจ่ายหรือเพิ่มรายรับ</span></div>
+      <div class="divider"></div>
+      <div class="lbl">ตัวอย่าง Monthly Cash Flow</div>
+      <div class="tbl-wrap">
+        <table>
+          <tr><th colspan="2" style="color:var(--green)">รายรับ (Income)</th></tr>
+          <tr><td>เงินเดือนสุทธิ (หลังหักภาษี + ประกันสังคม)</td><td style="text-align:right;color:var(--green)">+฿45,000</td></tr>
+          <tr><td>เงินปันผลกองทุน</td><td style="text-align:right;color:var(--green)">+฿1,200</td></tr>
+          <tr><td>Freelance งานพิเศษ</td><td style="text-align:right;color:var(--green)">+฿5,000</td></tr>
+          <tr><th colspan="2" style="color:var(--red)">รายจ่าย (Expense)</th></tr>
+          <tr><td>ผ่อนคอนโด</td><td style="text-align:right;color:var(--red)">−฿12,000</td></tr>
+          <tr><td>ผ่อนรถ</td><td style="text-align:right;color:var(--red)">−฿7,500</td></tr>
+          <tr><td>ค่าอาหาร + ของใช้</td><td style="text-align:right;color:var(--red)">−฿8,000</td></tr>
+          <tr><td>ค่าเดินทาง + น้ำมัน</td><td style="text-align:right;color:var(--red)">−฿3,000</td></tr>
+          <tr><td>ประกันชีวิต + สุขภาพ</td><td style="text-align:right;color:var(--red)">−฿2,500</td></tr>
+          <tr><td>บันเทิง / ท่องเที่ยว</td><td style="text-align:right;color:var(--red)">−฿3,000</td></tr>
+          <tr><th style="color:var(--amber)">ออม + ลงทุน</th><th style="text-align:right;color:var(--green)">฿15,200</th></tr>
+        </table>
+      </div>
+      <div class="good-box">✅ Savings Rate = ฿15,200 / ฿51,200 = 29.7% → เกินเป้าหมาย 20% ✓</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     PART 3 — การออม
+═══════════════════════════════════════════ -->
+<div class="part p3">
+  <div class="part-header">
+    <span class="part-num">PART 03</span>
+    <span class="part-title">การออม (Saving System)</span>
+  </div>
+
+  <div class="ch" id="p3-1">
+    <div class="ch-hd" onclick="tog(this)">
+      <div class="ch-title-wrap"><span class="ch-num">3.1</span><span class="ch-title">กรอบงบประมาณ 50/30/20 และ Pay Yourself First</span></div>
+      <span class="ch-arr">▶</span>
+    </div>
+    <div class="ch-body">
+      <div class="mc">
+        <div class="mv"><div class="mv-n" style="color:var(--red)">50%</div><div class="mv-l">Need — เช่า, อาหาร, เดินทาง</div></div>
+        <div class="mv"><div class="mv-n" style="color:var(--blue)">30%</div><div class="mv-l">Want — บันเทิง, ท่องเที่ยว</div></div>
+        <div class="mv"><div class="mv-n" style="color:var(--green)">20%</div><div class="mv-l">Save — ออม + ลงทุน + ชำระหนี้</div></div>
+      </div>
+      <div class="ana">🐻 แบ่งเค้กก่อนกิน ไม่ใช่กินก่อนแล้วค่อยเก็บส่วนที่เหลือ</div>
+      <div class="divider"></div>
+      <div class="lbl">Pay Yourself First</div>
+      <div class="txt">โอนเงินออมทันทีที่ได้รับรายได้ <b>ก่อนใช้จ่ายอื่นใด</b> ตั้งเป็น Auto-transfer เพื่อบังคับวินัย</div>
+    </div>
+  </div>
+
+  <div class="ch" id="p3-2">
+    <div class="ch-hd" onclick="tog(this)">
+      <div class="ch-title-wrap"><span class="ch-num">3.2</span><span class="ch-title">กองทุนฉุกเฉิน (Emergency Fund)</span></div>
+      <span class="ch-arr">▶</span>
+    </div>
+    <div class="ch-body">
+      <div class="txt">เงินสำรองเข้าถึงได้ทันทีในกรณีฉุกเฉิน — <b>ลำดับความสำคัญสูงสุดก่อนลงทุนทุกอย่าง</b></div>
+      <div class="ana">🐻 เหมือนถังดับเพลิง — ไม่ได้ใช้ทุกวัน แต่ขาดไม่ได้</div>
+      <div class="tbl-wrap" style="margin-top:12px">
+        <table>
+          <tr><th>ประเภท</th><th>จำนวนเดือน</th><th>ที่เก็บแนะนำ</th></tr>
+          <tr><td>พนักงานประจำ (ขั้นต่ำ)</td><td>3 เดือน</td><td>ออมทรัพย์ / MMF</td></tr>
+          <tr><td>พนักงานประจำ (แนะนำ)</td><td>6 เดือน</td><td>MMF</td></tr>
+          <tr><td>อาชีพอิสระ / ฟรีแลนซ์</td><td>12 เดือน</td><td>MMF + ออมทรัพย์</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="ch" id="p3-3">
+    <div class="ch-hd" onclick="tog(this)">
+      <div class="ch-title-wrap"><span class="ch-num">3.3</span><span class="ch-title">Dollar-Cost Averaging (DCA)</span></div>
+      <span class="ch-arr">▶</span>
+    </div>
+    <div class="ch-body">
+      <div class="txt">ลงทุนจำนวนเงินเท่ากันในระยะเวลาสม่ำเสมอ โดยไม่สนราคาตลาดขณะนั้น</div>
+      <div class="ana">🐻 เหมือนซื้อข้าวสารทุกอาทิตย์ — ถูกได้เยอะ แพงได้น้อย เฉลี่ยสมเหตุสมผล</div>
+      <ul class="ul" style="margin-top:12px">
+        <li><span class="pl pg">ข้อดี</span> ลด Timing Risk ไม่ต้องเดาจุดต่ำสุด</li>
+        <li><span class="pl pg">ข้อดี</span> สร้างวินัยการออม ทำ Auto-invest ได้</li>
+        <li><span class="pl pa">ข้อจำกัด</span> ในตลาดขาขึ้นยาว Lump Sum ให้ผลดีกว่าในระยะยาว</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="ch" id="p3-4">
+    <div class="ch-hd" onclick="tog(this)">
+      <div class="ch-title-wrap"><span class="ch-num">3.4</span><span class="ch-title">คำนวณเป้าหมายการออม (SMART Goals + PMT)</span></div>
+      <span class="ch-arr">▶</span>
+    </div>
+    <div class="ch-body">
+      <div class="lbl">คำนวณ DCA ต่อเดือน</div>
+      <div class="cr"><label>เป้าหมาย (บาท)</label><input type="range" min="100000" max="5000000" step="50000" value="1000000" id="gl" oninput="cSv()"><span id="glo">฿1,000,000</span></div>
+      <div class="cr"><label>ระยะเวลา (ปี)</label><input type="range" min="1" max="30" step="1" value="5" id="gy" oninput="cSv()"><span id="gyo">5 ปี</span></div>
+      <div class="cr"><label>ผลตอบแทน/ปี (%)</label><input type="range" min="1" max="15" step="0.5" value="7" id="gr" oninput="cSv()"><span id="gro">7.0%</span></div>
+      <div class="mc">
+        <div class="mv"><div class="mv-n" id="mth">฿13,815</div><div class="mv-l">ออมต่อเดือน</div></div>
+        <div class="mv"><div class="mv-n" id="tot">฿828,900</div><div class="mv-l">เงินโอนเข้าทั้งหมด</div></div>
+        <div class="mv"><div class="mv-n" id="int" style="color:var(--green)">฿171,100</div><div class="mv-l">ดอกเบี้ยที่ได้รับ</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     PART 4 — บริหารความเสี่ยง
+═══════════════════════════════════════════ -->
+<div class="part p4">
+  <div class="part-header">
+    <span class="part-num">PART 04</span>
+    <span class="part-title">บริหารความเสี่ยง (Risk Management)</span>
+  </div>
+
+  <div class="ch" id="p4-1">
+    <div class="ch-hd" onclick="tog(this)">
+      <div class="ch-title-wrap"><span class="ch-num">4.1</span><span class="ch-title">ประเภทความเสี่ยง (Risk Taxonomy)</span></div>
+      <span class="ch-arr">▶</span>
+    </div>
+    <div class="ch-body">
+      <div class="tbl-wrap">
+        <table>
+          <tr><th>ประเภท</th><th>คำอธิบาย</th><th>จัดการได้อย่างไร</th></tr>
+          <tr><td><b>Systematic</b></td><td>กระทบทุกสินทรัพย์ เช่น วิกฤตเศรษฐกิจ</td><td>กระจายไม่ได้ แต่ Hedge บางส่วนได้</td></tr>
+          <tr><td><b>Unsystematic</b></td><td>เฉพาะบริษัท เช่น ผู้บริหารลาออก</td><td>กระจายได้ด้วยการถือหลายสินทรัพย์</td></tr>
+          <tr><td><b>Liquidity</b></td><td>ขายไม่ได้ในราคาที่ต้องการ</td><td>เลือกสินทรัพย์ Volume สูง</td></tr>
+          <tr><td><b>Counterparty</b></td><td>คู่สัญญาผิดนัดชำระ</td><td>เลือก Broker/Exchange ที่น่าเชื่อถือ</td></tr>
+          <tr><td><b>Model Risk</b></td><td>โมเดลที่ใช้มีข้อผิดพลาด</td><td>Validate ด้วย Out-of-Sample Test</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="ch" id="p4-2">
+    <div class="ch-hd" onclick="tog(this)">
+      <div class="ch-title-wrap"><span class="ch-num">4.2</span><span class="ch-title">ตัวชี้วัดความเสี่ยง (Risk Metrics)</span></div>
+      <span class="ch-arr">▶</span>
+    </div>
+    <div class="ch-body">
+      <div class="lbl">Sharpe Ratio — ผลตอบแทนต่อหน่วยความเสี่ยง</div>
+      <div class="fml">Sharpe = (Rₚ − Rf) / σₚ
+<span class="c">เกณฑ์องค์กร: Sharpe ≥ 1.0
+&lt;0=แย่กว่าฝากธนาคาร | 0–1=พอใช้ | ≥1=ดี | ≥2=ดีมาก</span></div>
+      <div class="divider"></div>
+      <div class="lbl">Maximum Drawdown (Max DD)</div>
+      <div class="fml">Max DD = (Peak − Trough) / Peak × 100%
+<span class="c">เกณฑ์องค์กร: Max DD ≤ 20%
+สำคัญ: DD 50% ต้องทำกำไร 100% เพื่อกลับจุดเดิม</span></div>
+      <div class="divider"></div>
+      <div class="lbl">Value at Risk (VaR)</div>
+      <div class="fml">VaR (95%, 1 วัน) ≈ Portfolio × 1.645 × σ_daily
+<span class="c">ตัวอย่าง: พอร์ต ฿1M | σ_daily=1.5%
+VaR = 1,000,000 × 1.645 × 0.015 = ฿24,675/วัน</span></div>
+    </div>
+  </div>
+
+  <div class="ch" id="p4-3">
+    <div class="ch-hd" onclick="tog(this)">
+      <div class="ch-title-wrap"><span class="ch-num">4.3</span><span class="ch-title">Position Sizing — คำนวณขนาดลงทุน</span></div>
+      <span class="ch-arr">▶</span>
+    </div>
+    <div class="ch-body">
+      <div class="fml">Position Size = (พอร์ต × %Risk) ÷ (Entry − Stop Loss)</div>
+      <div class="divider"></div>
+      <div class="lbl">คำนวณ</div>
+      <div class="cr"><label>ขนาดพอร์ต (บาท)</label><input type="range" min="10000" max="1000000" step="10000" value="500000" id="pt" oninput="cPs()"><span id="pto">฿500,000</span></div>
+      <div class="cr"><label>Risk ต่อเทรด (%)</label><input type="range" min="0.5" max="5" step="0.5" value="1" id="pr" oninput="cPs()"><span id="pro">1.0%</span></div>
+      <div class="cr"><label>Entry − Stop Loss (บาท)</label><input type="range" min="1" max="50" step="1" value="5" id="dist" oninput="cPs()"><span id="disto">฿5</span></div>
+      <div class="mc">
+        <div class="mv"><div class="mv-n" id="pu">1,000</div><div class="mv-l">หน่วยที่ซื้อได้</div></div>
+        <div class="mv"><div class="mv-n" id="pb2" style="color:var(--red)">฿5,000</div><div class="mv-l">ความเสี่ยงต่อเทรด</div></div>
+      </div>
+      <div class="tbl-wrap" style="margin-top:14px">
+        <table>
+          <tr><th>ระดับ</th><th>%Risk ต่อเทรด</th><th>หมายเหตุ</th></tr>
+          <tr><td><span class="pl pg">มือใหม่</span></td><td>0.5–1%</td><td>ปลอดภัย เรียนรู้ได้นาน</td></tr>
+          <tr><td><span class="pl pb">มีประสบการณ์</span></td><td>1–2%</td><td>มาตรฐานทั่วไป</td></tr>
+          <tr><td><span class="pl pr">ห้ามทำ</span></td><td>&gt;5%</td><td>แพ้ 10 ครั้งติด พอร์ตหดครึ่ง</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="ch" id="p4-4">
+    <div class="ch-hd" onclick="tog(this)">
+      <div class="ch-title-wrap"><span class="ch-num">4.4</span><span class="ch-title">การกระจายความเสี่ยง (Diversification)</span></div>
+      <span class="ch-arr">▶</span>
+    </div>
+    <div class="ch-body">
+      <div class="fml">Portfolio σ² = w₁²σ₁² + w₂²σ₂² + 2w₁w₂σ₁σ₂ρ₁₂
+<span class="c">ρ: −1=ลดความเสี่ยงสูงสุด | 0=อิสระต่อกัน | +1=ไม่ช่วยกระจาย</span></div>
+      <div class="good-box">✅ กระจายถูกวิธี ≠ ถือหลายตัว — หุ้น 20 ตัว Correlation 0.9 ไม่ต่างจากถือ 1 ตัว<br>เกณฑ์องค์กร: Correlation ระหว่าง Strategy &lt; 0.7 | เป้าหมายเฉลี่ย &lt; 0.3</div>
+    </div>
+  </div>
+
+  <div class="ch" id="p4-5">
+    <div class="ch-hd" onclick="tog(this)">
+      <div class="ch-title-wrap"><span class="ch-num">4.5</span><span class="ch-title">Expectancy และ Risk:Reward Ratio</span></div>
+      <span class="ch-arr">▶</span>
+    </div>
+    <div class="ch-body">
+      <div class="lbl">Expectancy — วัด Edge ของกลยุทธ์</div>
+      <div class="fml">E = (Winrate × Avg Win) − (Lossrate × Avg Loss)
+<span class="c">ตัวอย่าง: Winrate 45% | Avg Win ฿200 | Avg Loss ฿100
+E = (0.45×200)−(0.55×100) = 90−55 = ฿35/เทรด → Positive Edge ✅</span></div>
+      <div class="divider"></div>
+      <div class="lbl">Winrate ขั้นต่ำตาม R:R</div>
+      <div class="tbl-wrap">
+        <table>
+          <tr><th>R:R Ratio</th><th>Winrate ขั้นต่ำ</th><th>หมายเหตุ</th></tr>
+          <tr><td>1:3</td><td>25%</td><td>แพ้ 3 ใน 4 ครั้งยังกำไร</td></tr>
+          <tr><td>1:2</td><td>33%</td><td>มาตรฐานทั่วไป</td></tr>
+          <tr><td><b>1:1.5</b></td><td><b>40%</b></td><td><span class="pl pa">เกณฑ์ขั้นต่ำองค์กร</span></td></tr>
+          <tr><td>1:1</td><td>50%</td><td>ต้องถูกครึ่งหนึ่งถึงได้คืนทุน</td></tr>
+        </table>
+      </div>
+      <div class="divider"></div>
+      <div class="lbl">เกณฑ์ขั้นต่ำองค์กร (Quant Trading Research)</div>
+      <div class="mc">
+        <div class="mv"><div class="mv-n">≥ 1:1.5</div><div class="mv-l">R:R Ratio</div></div>
+        <div class="mv"><div class="mv-n">≥ 40%</div><div class="mv-l">Winrate/ปี (ทุกปี)</div></div>
+        <div class="mv"><div class="mv-n">≥ 1.0</div><div class="mv-l">Sharpe Ratio</div></div>
+        <div class="mv"><div class="mv-n">≤ 20%</div><div class="mv-l">Max Drawdown</div></div>
+        <div class="mv"><div class="mv-n">≥ 1.3</div><div class="mv-l">Profit Factor</div></div>
+        <div class="mv"><div class="mv-n">≥ 5 ปี</div><div class="mv-l">Backtest Period</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PRIORITY FLOW -->
+<div class="part">
+  <div class="part-header">
+    <span class="part-num">SUMMARY</span>
+    <span class="part-title">ลำดับการเริ่มต้น (Priority Framework)</span>
+  </div>
+  <div class="flow">
+    <div class="flow-item"><div class="flow-num">1</div><div class="flow-text"><b class="flow-text">สร้างกองทุนฉุกเฉิน</b><div class="flow-sub">3–6 เดือน (อิสระ: 12 เดือน) — เก็บใน MMF หรือออมทรัพย์</div></div></div>
+    <div class="flow-arrow">↓</div>
+    <div class="flow-item"><div class="flow-num">2</div><div class="flow-text"><b class="flow-text">ชำระหนี้ดอกเบี้ยสูง</b><div class="flow-sub">บัตรเครดิต, สินเชื่อส่วนบุคคล (ดอกเบี้ย &gt; 5%) — ก่อนลงทุน</div></div></div>
+    <div class="flow-arrow">↓</div>
+    <div class="flow-item"><div class="flow-num">3</div><div class="flow-text"><b class="flow-text">วางระบบ Cash Flow</b><div class="flow-sub">แยกบัญชี: รายรับ → ออม 20% ก่อน → ใช้จ่าย 80%</div></div></div>
+    <div class="flow-arrow">↓</div>
+    <div class="flow-item"><div class="flow-num">4</div><div class="flow-text"><b class="flow-text">ลงทุนด้วย DCA</b><div class="flow-sub">กองทุนดัชนี / ETF ที่ค่าธรรมเนียมต่ำ กระจายข้าม Asset Class</div></div></div>
+    <div class="flow-arrow">↓</div>
+    <div class="flow-item"><div class="flow-num">5</div><div class="flow-text"><b class="flow-text">เพิ่ม Passive Income</b><div class="flow-sub">เงินปันผล, ค่าเช่า, Royalty — ลดการพึ่งพา Active Income</div></div></div>
+    <div class="flow-arrow">↓</div>
+    <div class="flow-item"><div class="flow-num">6</div><div class="flow-text"><b class="flow-text">บริหาร Risk อย่างเป็นระบบ</b><div class="flow-sub">Position Sizing ≤ 2% | Correlation &lt; 0.7 | Sharpe ≥ 1.0 | Max DD ≤ 20%</div></div></div>
+    <div class="flow-arrow">↓</div>
+    <div class="flow-item" style="border-color:rgba(34,197,94,0.3)"><div class="flow-num" style="color:var(--green)">✓</div><div class="flow-text" style="color:var(--green)"><b>Financial Independence</b><div class="flow-sub" style="color:var(--muted)">Passive Income ≥ Monthly Expenses → เวลาเป็นของคุณ</div></div></div>
+  </div>
+</div>
+
+<div class="disclaimer">
+  ⚠️ <b>Disclaimer:</b> เนื้อหาในเอกสารนี้จัดทำขึ้นเพื่อวัตถุประสงค์ด้านการศึกษาเท่านั้น ไม่ถือเป็นคำแนะนำการลงทุน การวางแผนการเงิน หรือคำปรึกษาทางภาษีแต่อย่างใด การลงทุนมีความเสี่ยง ผู้ลงทุนควรศึกษาข้อมูลให้ครบถ้วนและปรึกษาผู้เชี่ยวชาญก่อนตัดสินใจ 🐻 | Quant Trading Research Organization | Version 1.0 | April 2026
+</div>
+
+</main>
+</div>
+
+<script>
+function tog(hd) {
+  var ch = hd.parentElement;
+  ch.classList.toggle('open');
+}
+
+function scrollTo(id) {
+  var el = document.getElementById(id);
+  if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+  document.querySelectorAll('.nav-item').forEach(function(n) { n.classList.remove('active'); });
+  document.querySelectorAll('.nav-item').forEach(function(n) {
+    if (n.getAttribute('onclick') && n.getAttribute('onclick').includes("'" + id + "'")) {
+      n.classList.add('active');
+    }
+  });
+}
+
+var f = function(n) { return '฿' + Math.round(n).toLocaleString(); };
+
+function cFV() {
+  var pv = +document.getElementById('pv').value;
+  var r = +document.getElementById('rt').value / 100;
+  var n = +document.getElementById('yr').value;
+  var fv = pv * Math.pow(1 + r, n);
+  document.getElementById('pvo').textContent = f(pv);
+  document.getElementById('rto').textContent = (+document.getElementById('rt').value).toFixed(1) + '%';
+  document.getElementById('yro').textContent = n + ' ปี';
+  document.getElementById('fvo').textContent = f(fv);
+  document.getElementById('gno').textContent = f(fv - pv);
+  document.getElementById('xo').textContent = '×' + (fv / pv).toFixed(2);
+}
+
+function cSv() {
+  var goal = +document.getElementById('gl').value;
+  var y = +document.getElementById('gy').value;
+  var r = +document.getElementById('gr').value / 100 / 12;
+  var n = y * 12;
+  var pmt = goal * r / (Math.pow(1 + r, n) - 1);
+  var co = pmt * n;
+  document.getElementById('glo').textContent = f(goal);
+  document.getElementById('gyo').textContent = y + ' ปี';
+  document.getElementById('gro').textContent = (+document.getElementById('gr').value).toFixed(1) + '%';
+  document.getElementById('mth').textContent = f(pmt);
+  document.getElementById('tot').textContent = f(co);
+  document.getElementById('int').textContent = f(goal - co);
+}
+
+function cPs() {
+  var pt = +document.getElementById('pt').value;
+  var pr = +document.getElementById('pr').value / 100;
+  var dist = +document.getElementById('dist').value;
+  if (dist < 1) dist = 1;
+  var ra = pt * pr;
+  var u = ra / dist;
+  document.getElementById('pto').textContent = f(pt);
+  document.getElementById('pro').textContent = (+document.getElementById('pr').value).toFixed(1) + '%';
+  document.getElementById('disto').textContent = '฿' + dist;
+  document.getElementById('pu').textContent = Math.floor(u).toLocaleString();
+  document.getElementById('pb2').textContent = f(ra);
+}
+
+cFV(); cSv(); cPs();
+
+// Active nav on scroll
+window.addEventListener('scroll', function() {
+  var sections = ['hero','p1-1','p1-2','p1-3','p1-4','p2-1','p2-2','p2-3','p2-4','p2-5','p2-6','p3-1','p3-2','p3-3','p3-4','p4-1','p4-2','p4-3','p4-4','p4-5'];
+  var cur = '';
+  sections.forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el && el.getBoundingClientRect().top < 120) cur = id;
+  });
+  document.querySelectorAll('.nav-item').forEach(function(n) {
+    n.classList.remove('active');
+    if (n.getAttribute('onclick') && cur && n.getAttribute('onclick').includes("'" + cur + "'")) {
+      n.classList.add('active');
+    }
+  });
+});
+</script>
+</body>
+</html>
