@@ -1,0 +1,428 @@
+//@version=5
+indicator("Set1 / 1M2C + JSON Bot", overlay=true, max_labels_count=500, max_lines_count=500)
+
+// WEBHOOK VERSION 7
+// แก้ไขจาก v6: เพิ่ม TP Hit Logic
+//   - เพิ่ม arrReward1_5r เก็บระดับ TP ของแต่ละ Signal
+//   - ตอน ACTIVE: ถ้าราคาถึง 1.5R → removeAll() ลบเส้น SL ออก
+//   - TP Hit และ SL Hit ต่างก็ให้ MT5 ปิด Order เอง Pine แค่ลบ Ray
+
+grp2 = "Pattern Settings"
+useSizeFilter   = input.bool(true,  title="เปิดใช้กรองขนาดแท่งแม่",                  group=grp2)
+maxMotherPoints = input.int(6000,   title="ขนาดแท่งแม่สูงสุด (Points)",              minval=1,  group=grp2)
+insideBarCount  = input.int(2,      title="จำนวนแท่งลูก (Inside Bars)",              minval=1, maxval=10, group=grp2)
+signalBarIndex  = input.int(2,      title="แสดงสัญญาณที่แท่งลูกที่เท่าไหร่",        minval=1, maxval=10, group=grp2)
+dirBarIndex     = input.int(0,      title="อ้างอิงทิศทาง (Buy/Sell) จากสีแท่งไหน", minval=0, maxval=10, group=grp2)
+
+grp3 = "Time Filter"
+useDateFilter  = input.bool(true, title="เปิดใช้ตัวกรองวันที่", group=grp3)
+startDateInput = input.time(timestamp("01 Jan 2026 00:00 +0700"), title="เริ่ม (Start)", group=grp3)
+endDateInput   = input.time(timestamp("31 Dec 2026 23:59 +0700"), title="สิ้นสุด (End)", group=grp3)
+
+grp4 = "Timeframe Filter"
+useTfFilter = input.bool(true,       title="เปิดใช้ตัวกรองไทม์เฟรม",          group=grp4)
+targetTf    = input.timeframe("1", title="ไทม์เฟรมที่ต้องการให้แสดงผล",     group=grp4)
+
+grp5 = "Visuals"
+buyText        = input.string("1M2C",  title="ข้อความสัญญาณ Buy",  group=grp5)
+sellText       = input.string("1M2C",  title="ข้อความสัญญาณ Sell", group=grp5)
+buyLabelColor  = input.color(color.rgb(76,  175, 80),  title="สีสัญญาณ Buy",     group=grp5)
+sellLabelColor = input.color(color.rgb(244, 67,  54),  title="สีสัญญาณ Sell",    group=grp5)
+rayBuyColor    = input.color(color.rgb(76,  175, 80),  title="สีเส้น Ray (Buy)",  group=grp5)
+raySellColor   = input.color(color.rgb(244, 67,  54),  title="สีเส้น Ray (Sell)", group=grp5)
+labelSize      = input.string("normal", title="ขนาดตัวอักษรราคา",   options=["tiny","small","normal","large"], group=grp5)
+tableSize      = input.string("small",  title="ขนาดตัวอักษรตาราง", options=["tiny","small","normal","large"], group=grp5)
+rayWidth       = input.int(1,  title="ความหนาเส้น Ray",           minval=1, maxval=4,   group=grp5)
+priceDec       = input.int(2,  title="ทศนิยมราคา (Decimal)",      minval=0, maxval=8,   group=grp5)
+labelOffset    = input.int(8,  title="ระยะป้ายราคาจากขวา (bars)", minval=1, maxval=500, group=grp5)
+
+grp6 = "Risk Calculator"
+balance      = input.float(32100, title="Balance ($)",          minval=0,  step=100,   group=grp6)
+portDiv      = input.float(3,     title="จำนวนการหารของพอร์ต", minval=1,  step=1,     group=grp6)
+riskPct      = input.float(5.88,  title="Risk Per Trade (%)",   minval=0,  maxval=100, step=0.1, group=grp6)
+digitInput   = input.int(2,       title="Digit (ทศนิยมราคา)",  minval=1,  maxval=5,   group=grp6)
+contractSize = input.float(100,   title="Contract Size",        minval=1,  step=1,     group=grp6)
+spreadPoints = input.int(32,      title="Spread (Points)",      minval=0,              group=grp6)
+
+grp7 = "Alert Settings"
+warnMinutes = input.int(10, title="แจ้งเตือนล่วงหน้าก่อนปิดแท่ง (นาที)", minval=1, group=grp7)
+
+// ============================================================
+// HELPER FUNCTIONS
+// ============================================================
+getLabelSize(s) =>
+    s == "tiny" ? size.tiny : s == "small" ? size.small : s == "normal" ? size.normal : size.large
+
+roundP(v) =>
+    math.round(v * math.pow(10, priceDec)) / math.pow(10, priceDec)
+
+calcLot(priceH, priceL) =>
+    smallestPip = 1.0 / math.pow(10, digitInput - 1)
+    pipVal      = smallestPip * contractSize
+    slPips      = (priceH - priceL) / smallestPip
+    riskAmt     = (balance / portDiv) * (riskPct / 100)
+    rawLot      = slPips > 0 ? riskAmt / (slPips * pipVal) : 0
+    math.max(math.round(rawLot * 100) / 100, 0.01)
+
+spreadValue() =>
+    spreadPoints * syminfo.mintick
+
+// ============================================================
+// FILTERS
+// ============================================================
+inDateRange = useDateFilter ? (time >= startDateInput and time <= endDateInput) : true
+inTimeframe = useTfFilter   ? (timeframe.period == targetTf) : true
+passFilter  = inDateRange and inTimeframe
+
+isNInsideBars() =>
+    motherH = high[insideBarCount]
+    motherL = low[insideBarCount]
+    ok      = true
+    for i = 1 to insideBarCount
+        if high[insideBarCount - i] > motherH or low[insideBarCount - i] < motherL
+            ok := false
+    ok
+
+refBarShift() => insideBarCount
+
+motherRangePoints = (high[insideBarCount] - low[insideBarCount]) / syminfo.mintick
+sizeOk            = not useSizeFilter or (motherRangePoints <= maxMotherPoints)
+isPatternComplete = isNInsideBars()
+
+buySignal  = isPatternComplete and sizeOk and passFilter
+sellSignal = isPatternComplete and sizeOk and passFilter
+
+colorRefIndex = insideBarCount - math.min(dirBarIndex, insideBarCount)
+signalBull    = close[colorRefIndex] >= open[colorRefIndex]
+buySignal    := buySignal  and signalBull
+sellSignal   := sellSignal and not signalBull
+
+// ============================================================
+// ARRAYS
+// ============================================================
+var array<line>   arrLineHigh   = array.new<line>()
+var array<line>   arrLineLow    = array.new<line>()
+var array<label>  arrLabelHigh  = array.new<label>()
+var array<label>  arrLabelLow   = array.new<label>()
+var array<float>  arrPriceHigh  = array.new<float>()
+var array<float>  arrPriceLow   = array.new<float>()
+var array<string> arrSide       = array.new<string>()
+var array<bool>   arrFilled     = array.new<bool>()
+var array<int>    arrSigId      = array.new<int>()
+var array<float>  arrReward1r   = array.new<float>()   // 1R  → ใช้ตรวจ Breakeven
+var array<float>  arrReward1_5r = array.new<float>()   // 1.5R → ใช้ตรวจ TP Hit
+var array<bool>   arrBEsent     = array.new<bool>()
+
+var bool  buyLabelDrawn  = false
+var bool  sellLabelDrawn = false
+var bool  lastIsBuy      = true
+var float lastHigh       = na
+var float lastLow        = na
+var float lastAsk        = na
+var float lastLot        = na
+
+barMs      = timeframe.in_seconds() * 1000
+futureTime = time + barMs * labelOffset
+
+// สีโปร่งใส — ซ่อนเส้น Entry หลัง Fill โดยไม่ต้อง remove ออกจาก Array
+_transparent = color.new(color.white, 100)
+
+// ============================================================
+// removeAll — ลบทุก Array พร้อมกันใน index เดียว
+// เรียกใช้เมื่อ: cancel_pending, SL Hit, TP Hit
+// ============================================================
+removeAll(int idx) =>
+    line.delete(array.get(arrLineHigh,  idx))
+    line.delete(array.get(arrLineLow,   idx))
+    label.delete(array.get(arrLabelHigh, idx))
+    label.delete(array.get(arrLabelLow,  idx))
+    array.remove(arrLineHigh,   idx)
+    array.remove(arrLineLow,    idx)
+    array.remove(arrLabelHigh,  idx)
+    array.remove(arrLabelLow,   idx)
+    array.remove(arrPriceHigh,  idx)
+    array.remove(arrPriceLow,   idx)
+    array.remove(arrSide,       idx)
+    array.remove(arrFilled,     idx)
+    array.remove(arrSigId,      idx)
+    array.remove(arrReward1r,   idx)
+    array.remove(arrReward1_5r, idx)
+    array.remove(arrBEsent,     idx)
+
+// ============================================================
+// BREAK CHECK — Real-time ทุก tick
+// ============================================================
+if array.size(arrLineHigh) > 0
+    i = array.size(arrLineHigh) - 1
+    while i >= 0
+        ph    = array.get(arrPriceHigh,  i)
+        pl    = array.get(arrPriceLow,   i)
+        side  = array.get(arrSide,       i)
+        filled = array.get(arrFilled,    i)
+        sid   = array.get(arrSigId,      i)
+        r1    = array.get(arrReward1r,   i)
+        r1_5  = array.get(arrReward1_5r, i)
+        beSent = array.get(arrBEsent,    i)
+
+        if not filled
+            // ── PENDING ────────────────────────────────────────────────────
+            if side == "buy"
+
+                if high >= ph
+                    // Buy Stop PENDING → ราคาชน Ray_Upper → FILL
+                    // ซ่อนเส้น Entry ไม่ remove → index ยังครบ
+                    array.set(arrFilled, i, true)
+                    line.set_color(array.get(arrLineHigh,   i), _transparent)
+                    label.set_color(array.get(arrLabelHigh, i), _transparent)
+                    label.set_textcolor(array.get(arrLabelHigh, i), _transparent)
+                    _j = '{"event":"order_filled","side":"buy","symbol":"' + syminfo.ticker + '","timeframe":"' + timeframe.period + '","signal_id":' + str.tostring(sid) + ',"entry_high":' + str.tostring(ph, "#.##") + ',"entry_low":' + str.tostring(pl, "#.##") + '}'
+                    alert(_j, alert.freq_once_per_bar)
+
+                else if low <= pl
+                    // Buy Stop PENDING → ราคาชน Ray_Lower ก่อน Fill → CANCEL
+                    _j = '{"event":"cancel_pending","side":"buy","symbol":"' + syminfo.ticker + '","timeframe":"' + timeframe.period + '","signal_id":' + str.tostring(sid) + ',"entry_high":' + str.tostring(ph, "#.##") + ',"entry_low":' + str.tostring(pl, "#.##") + '}'
+                    alert(_j, alert.freq_once_per_bar)
+                    removeAll(i)
+                    i -= 1
+                    continue
+
+            else // sell
+
+                if low <= pl
+                    // Sell Stop PENDING → ราคาชน Ray_Lower → FILL
+                    // ซ่อนเส้น Entry ไม่ remove → index ยังครบ
+                    array.set(arrFilled, i, true)
+                    line.set_color(array.get(arrLineLow,   i), _transparent)
+                    label.set_color(array.get(arrLabelLow, i), _transparent)
+                    label.set_textcolor(array.get(arrLabelLow, i), _transparent)
+                    _j = '{"event":"order_filled","side":"sell","symbol":"' + syminfo.ticker + '","timeframe":"' + timeframe.period + '","signal_id":' + str.tostring(sid) + ',"entry_high":' + str.tostring(ph, "#.##") + ',"entry_low":' + str.tostring(pl, "#.##") + '}'
+                    alert(_j, alert.freq_once_per_bar)
+
+                else if high >= ph
+                    // Sell Stop PENDING → ราคาชน Ray_Upper ก่อน Fill → CANCEL
+                    _j = '{"event":"cancel_pending","side":"sell","symbol":"' + syminfo.ticker + '","timeframe":"' + timeframe.period + '","signal_id":' + str.tostring(sid) + ',"entry_high":' + str.tostring(ph, "#.##") + ',"entry_low":' + str.tostring(pl, "#.##") + '}'
+                    alert(_j, alert.freq_once_per_bar)
+                    removeAll(i)
+                    i -= 1
+                    continue
+
+        else
+            // ── ACTIVE ─────────────────────────────────────────────────────
+            if side == "buy"
+
+                if not beSent and high >= r1
+                    // Buy ACTIVE → ราคาถึง 1R → Breakeven
+                    array.set(arrBEsent, i, true)
+                    _beSL = ph - spreadValue()
+                    _j = '{"event":"breakeven","side":"buy","symbol":"' + syminfo.ticker + '","timeframe":"' + timeframe.period + '","signal_id":' + str.tostring(sid) + ',"entry_high":' + str.tostring(ph, "#.##") + ',"entry_low":' + str.tostring(pl, "#.##") + ',"breakeven_sl":' + str.tostring(_beSL, "#.##") + ',"reward_1r":' + str.tostring(r1, "#.##") + '}'
+                    alert(_j, alert.freq_once_per_bar)
+
+                if high >= r1_5
+                    // Buy ACTIVE → ราคาถึง 1.5R → TP Hit
+                    // MT5 ปิด Order เอง → ลบ Ray ทั้งหมดออก
+                    removeAll(i)
+                    i -= 1
+                    continue
+
+                if low <= pl
+                    // Buy ACTIVE → ราคาชน Ray_Lower = SL Hit
+                    // MT5 ปิด Order เอง → ลบ Ray ทั้งหมดออก
+                    removeAll(i)
+                    i -= 1
+                    continue
+
+            else // sell
+
+                if not beSent and low <= r1
+                    // Sell ACTIVE → ราคาถึง 1R → Breakeven
+                    array.set(arrBEsent, i, true)
+                    _beSL = pl + spreadValue()
+                    _j = '{"event":"breakeven","side":"sell","symbol":"' + syminfo.ticker + '","timeframe":"' + timeframe.period + '","signal_id":' + str.tostring(sid) + ',"entry_high":' + str.tostring(ph, "#.##") + ',"entry_low":' + str.tostring(pl, "#.##") + ',"breakeven_sl":' + str.tostring(_beSL, "#.##") + ',"reward_1r":' + str.tostring(r1, "#.##") + '}'
+                    alert(_j, alert.freq_once_per_bar)
+
+                if low <= r1_5
+                    // Sell ACTIVE → ราคาถึง 1.5R → TP Hit
+                    // MT5 ปิด Order เอง → ลบ Ray ทั้งหมดออก
+                    removeAll(i)
+                    i -= 1
+                    continue
+
+                if high >= ph
+                    // Sell ACTIVE → ราคาชน Ray_Upper = SL Hit
+                    // MT5 ปิด Order เอง → ลบ Ray ทั้งหมดออก
+                    removeAll(i)
+                    i -= 1
+                    continue
+
+        i -= 1
+
+if array.size(arrLabelHigh) > 0
+    for i = 0 to array.size(arrLabelHigh) - 1
+        label.set_x(array.get(arrLabelHigh, i), futureTime)
+        label.set_x(array.get(arrLabelLow,  i), futureTime)
+
+// ============================================================
+// REF PRICES
+// ============================================================
+refShift = refBarShift()
+refH     = high[refShift]
+refL     = low[refShift]
+
+// ============================================================
+// BUY SIGNAL
+// ============================================================
+if buySignal and not buyLabelDrawn
+    label.new(x=bar_index, y=low, text=buyText, color=buyLabelColor, textcolor=color.white, style=label.style_label_up, yloc=yloc.belowbar, size=size.normal)
+    lotSize  = calcLot(refH, refL)
+    askHigh  = refH + spreadValue()
+    slDist   = refH - refL
+    tp1r     = roundP(refH + slDist)
+    tp1_5r   = roundP(refH + slDist * 1.5)
+    fmt      = "#." + str.repeat("0", priceDec)
+    textH    = str.tostring(refH, fmt) + "  |  Lot: " + str.tostring(lotSize, "0.00") + "  |  Ask: " + str.tostring(askHigh, fmt)
+    textL    = str.tostring(refL, fmt) + "  |  Lot: " + str.tostring(lotSize, "0.00")
+    lh  = line.new(x1=bar_index[refShift], y1=refH, x2=bar_index, y2=refH, color=rayBuyColor, width=rayWidth, style=line.style_dashed, extend=extend.right)
+    ll  = line.new(x1=bar_index[refShift], y1=refL, x2=bar_index, y2=refL, color=rayBuyColor, width=rayWidth, style=line.style_dashed, extend=extend.right)
+    lbh = label.new(x=futureTime, y=refH, text=textH, color=rayBuyColor, textcolor=color.white, style=label.style_label_left, yloc=yloc.price, size=getLabelSize(labelSize), xloc=xloc.bar_time)
+    lbl = label.new(x=futureTime, y=refL, text=textL, color=rayBuyColor, textcolor=color.white, style=label.style_label_left, yloc=yloc.price, size=getLabelSize(labelSize), xloc=xloc.bar_time)
+    array.push(arrLineHigh,   lh)
+    array.push(arrLineLow,    ll)
+    array.push(arrLabelHigh,  lbh)
+    array.push(arrLabelLow,   lbl)
+    array.push(arrPriceHigh,  refH)
+    array.push(arrPriceLow,   refL)
+    array.push(arrSide,       "buy")
+    array.push(arrFilled,     false)
+    array.push(arrSigId,      bar_index[refShift])
+    array.push(arrReward1r,   tp1r)
+    array.push(arrReward1_5r, tp1_5r)
+    array.push(arrBEsent,     false)
+    lastIsBuy := true
+    lastHigh  := refH
+    lastLow   := refL
+    lastAsk   := askHigh
+    lastLot   := lotSize
+    buyLabelDrawn  := true
+    sellLabelDrawn := false
+
+// ============================================================
+// SELL SIGNAL
+// ============================================================
+if sellSignal and not sellLabelDrawn
+    label.new(x=bar_index, y=high, text=sellText, color=sellLabelColor, textcolor=color.white, style=label.style_label_down, yloc=yloc.abovebar, size=size.normal)
+    lotSize  = calcLot(refH, refL)
+    askHigh  = refH + spreadValue()
+    slDist   = refH - refL
+    tp1r     = roundP(refL - slDist)
+    tp1_5r   = roundP(refL - slDist * 1.5)
+    fmt      = "#." + str.repeat("0", priceDec)
+    textH    = str.tostring(refH, fmt) + "  |  Lot: " + str.tostring(lotSize, "0.00") + "  |  Ask: " + str.tostring(askHigh, fmt)
+    textL    = str.tostring(refL, fmt) + "  |  Lot: " + str.tostring(lotSize, "0.00")
+    lh  = line.new(x1=bar_index[refShift], y1=refH, x2=bar_index, y2=refH, color=raySellColor, width=rayWidth, style=line.style_dashed, extend=extend.right)
+    ll  = line.new(x1=bar_index[refShift], y1=refL, x2=bar_index, y2=refL, color=raySellColor, width=rayWidth, style=line.style_dashed, extend=extend.right)
+    lbh = label.new(x=futureTime, y=refH, text=textH, color=raySellColor, textcolor=color.white, style=label.style_label_left, yloc=yloc.price, size=getLabelSize(labelSize), xloc=xloc.bar_time)
+    lbl = label.new(x=futureTime, y=refL, text=textL, color=raySellColor, textcolor=color.white, style=label.style_label_left, yloc=yloc.price, size=getLabelSize(labelSize), xloc=xloc.bar_time)
+    array.push(arrLineHigh,   lh)
+    array.push(arrLineLow,    ll)
+    array.push(arrLabelHigh,  lbh)
+    array.push(arrLabelLow,   lbl)
+    array.push(arrPriceHigh,  refH)
+    array.push(arrPriceLow,   refL)
+    array.push(arrSide,       "sell")
+    array.push(arrFilled,     false)
+    array.push(arrSigId,      bar_index[refShift])
+    array.push(arrReward1r,   tp1r)
+    array.push(arrReward1_5r, tp1_5r)
+    array.push(arrBEsent,     false)
+    lastIsBuy := false
+    lastHigh  := refH
+    lastLow   := refL
+    lastAsk   := askHigh
+    lastLot   := lotSize
+    sellLabelDrawn := true
+    buyLabelDrawn  := false
+
+if not isPatternComplete
+    buyLabelDrawn  := false
+    sellLabelDrawn := false
+
+// ============================================================
+// TABLE
+// ============================================================
+var table infoTable = table.new(position.top_right, 2, 9, bgcolor=color.rgb(30,30,30,10), border_color=color.rgb(255,255,255), border_width=1, frame_color=color.rgb(255,255,255), frame_width=1)
+
+if not na(lastHigh)
+    sigColor = lastIsBuy ? color.rgb(76, 175, 80) : color.rgb(244, 67, 54)
+    sigText  = lastIsBuy ? "BUY STOP" : "SELL STOP"
+    fmt      = "#." + str.repeat("0", priceDec)
+    ts       = getLabelSize(tableSize)
+    slDist   = lastHigh - lastLow
+    oneR     = lastIsBuy ? roundP(lastHigh + slDist)       : roundP(lastLow  - slDist)
+    oneHalfR = lastIsBuy ? roundP(lastHigh + slDist * 1.5) : roundP(lastLow  - slDist * 1.5)
+    table.cell(infoTable, 0, 0, " ", bgcolor=color.rgb(255,255,255), text_size=ts)
+    table.cell(infoTable, 1, 0, " ", bgcolor=color.rgb(255,255,255), text_size=ts)
+    table.cell(infoTable, 0, 1, " ", bgcolor=color.rgb(255,255,255), text_size=ts)
+    table.cell(infoTable, 1, 1, " ", bgcolor=color.rgb(255,255,255), text_size=ts)
+    table.cell(infoTable, 0, 2, "Entry",          text_color=color.silver,         bgcolor=color.rgb(20,20,20), text_size=ts)
+    table.cell(infoTable, 1, 2, sigText,           text_color=sigColor,             bgcolor=color.rgb(20,20,20), text_size=ts)
+    table.cell(infoTable, 0, 3, "Level Up + Ask", text_color=color.silver,         bgcolor=color.rgb(30,30,30), text_size=ts)
+    table.cell(infoTable, 1, 3, str.tostring(lastAsk, fmt),          text_color=color.white,          bgcolor=color.rgb(30,30,30), text_size=ts)
+    table.cell(infoTable, 0, 4, "Level Down",     text_color=color.silver,         bgcolor=color.rgb(30,30,30), text_size=ts)
+    table.cell(infoTable, 1, 4, str.tostring(lastLow, fmt),          text_color=color.white,          bgcolor=color.rgb(30,30,30), text_size=ts)
+    table.cell(infoTable, 0, 5, "Lot Size",       text_color=color.silver,         bgcolor=color.rgb(30,30,30), text_size=ts)
+    table.cell(infoTable, 1, 5, str.tostring(lastLot, "0.00"),       text_color=color.yellow,         bgcolor=color.rgb(30,30,30), text_size=ts)
+    table.cell(infoTable, 0, 6, "1R Price",       text_color=color.silver,         bgcolor=color.rgb(30,30,30), text_size=ts)
+    table.cell(infoTable, 1, 6, str.tostring(oneR, fmt),             text_color=color.rgb(255,165,0), bgcolor=color.rgb(30,30,30), text_size=ts)
+    table.cell(infoTable, 0, 7, "1.5R Price",     text_color=color.silver,         bgcolor=color.rgb(30,30,30), text_size=ts)
+    table.cell(infoTable, 1, 7, str.tostring(oneHalfR, fmt),         text_color=color.rgb(255,200,0), bgcolor=color.rgb(30,30,30), text_size=ts)
+    table.cell(infoTable, 0, 8, "Risk %",         text_color=color.silver,         bgcolor=color.rgb(30,30,30), text_size=ts)
+    table.cell(infoTable, 1, 8, str.tostring(riskPct, "0.00") + "%", text_color=color.aqua,           bgcolor=color.rgb(30,30,30), text_size=ts)
+
+// ============================================================
+// ALERTS — JSON Webhook
+// ============================================================
+alertcondition(buySignal,  title="1M2C Buy",  message="1M2C (B) - Inside Bar Buy Signal")
+alertcondition(sellSignal, title="1M2C Sell", message="1M2C (S) - Inside Bar Sell Signal")
+
+var bool warnedThisBar = false
+if barstate.isnew
+    warnedThisBar := false
+
+timeLeftMs = time_close - timenow
+warnTimeMs = warnMinutes * 60 * 1000
+isWarnZone = (timeLeftMs <= warnTimeMs) and (timeLeftMs > 0)
+
+// ── Pre-Warning ──────────────────────────────────────────────────────────────
+if buySignal and isWarnZone and not warnedThisBar
+    _j = '{"event":"pre_warning","side":"buy","symbol":"' + syminfo.ticker + '","timeframe":"' + timeframe.period + '","signal_id":' + str.tostring(bar_index[refShift]) + ',"entry_high":' + str.tostring(refH, "#.##") + ',"entry_low":' + str.tostring(refL, "#.##") + ',"lot":' + str.tostring(calcLot(refH, refL), "0.00") + '}'
+    alert(_j, alert.freq_once_per_bar)
+    warnedThisBar := true
+
+if sellSignal and isWarnZone and not warnedThisBar
+    _j = '{"event":"pre_warning","side":"sell","symbol":"' + syminfo.ticker + '","timeframe":"' + timeframe.period + '","signal_id":' + str.tostring(bar_index[refShift]) + ',"entry_high":' + str.tostring(refH, "#.##") + ',"entry_low":' + str.tostring(refL, "#.##") + ',"lot":' + str.tostring(calcLot(refH, refL), "0.00") + '}'
+    alert(_j, alert.freq_once_per_bar)
+    warnedThisBar := true
+
+// ── Signal New ───────────────────────────────────────────────────────────────
+if buySignal
+    _j = '{"event":"signal_new","side":"buy","symbol":"' + syminfo.ticker + '","timeframe":"' + timeframe.period + '","signal_id":' + str.tostring(bar_index[refShift]) + ',"entry_high":' + str.tostring(refH, "#.##") + ',"entry_low":' + str.tostring(refL, "#.##") + ',"lot":' + str.tostring(calcLot(refH, refL), "0.00") + '}'
+    alert(_j, alert.freq_once_per_bar)
+
+if sellSignal
+    _j = '{"event":"signal_new","side":"sell","symbol":"' + syminfo.ticker + '","timeframe":"' + timeframe.period + '","signal_id":' + str.tostring(bar_index[refShift]) + ',"entry_high":' + str.tostring(refH, "#.##") + ',"entry_low":' + str.tostring(refL, "#.##") + ',"lot":' + str.tostring(calcLot(refH, refL), "0.00") + '}'
+    alert(_j, alert.freq_once_per_bar)
+
+// ── Order Confirmed — TP คงที่ที่ 1.5R ───────────────────────────────────────
+if buySignal and barstate.isconfirmed
+    _sl   = refH - refL
+    _tp15 = roundP(refH + _sl * 1.5)
+    _ask  = refH + spreadValue()
+    _j = '{"event":"order_confirmed","side":"buy","symbol":"' + syminfo.ticker + '","timeframe":"' + timeframe.period + '","signal_id":' + str.tostring(bar_index[refShift]) + ',"entry_high":' + str.tostring(refH, "#.##") + ',"ask_entry":' + str.tostring(_ask, "#.##") + ',"entry_low":' + str.tostring(refL, "#.##") + ',"lot":' + str.tostring(calcLot(refH, refL), "0.00") + ',"reward_1_5r":' + str.tostring(_tp15, "#.##") + '}'
+    alert(_j, alert.freq_once_per_bar_close)
+
+if sellSignal and barstate.isconfirmed
+    _sl    = refH - refL
+    _tp15  = roundP(refL - _sl * 1.5)
+    _asksl = refH + spreadValue()
+    _j = '{"event":"order_confirmed","side":"sell","symbol":"' + syminfo.ticker + '","timeframe":"' + timeframe.period + '","signal_id":' + str.tostring(bar_index[refShift]) + ',"entry_high":' + str.tostring(refH, "#.##") + ',"ask_sl":' + str.tostring(_asksl, "#.##") + ',"entry_low":' + str.tostring(refL, "#.##") + ',"lot":' + str.tostring(calcLot(refH, refL), "0.00") + ',"reward_1_5r":' + str.tostring(_tp15, "#.##") + '}'
+    alert(_j, alert.freq_once_per_bar_close)
