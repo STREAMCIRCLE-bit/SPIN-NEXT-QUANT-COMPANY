@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quant Trading Research Org Chart</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Noto+Sans+Thai:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:#0a0a1a;font-family:'Noto Sans Thai','Sarabun',sans-serif;min-height:100vh;}
+.page{padding:30px 20px 60px;min-width:1380px;}
+.header{text-align:center;margin-bottom:20px;}
+.header h1{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;color:#e94560;letter-spacing:3px;}
+.header .sub{color:rgba(255,255,255,0.4);font-size:13px;margin-top:5px;letter-spacing:1px;}
+.legend{display:flex;justify-content:center;gap:18px;margin-top:12px;flex-wrap:wrap;}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:middle;}
+.legend span{color:rgba(255,255,255,0.5);font-size:11px;}
+
+#canvas{position:relative;width:100%;margin:0 auto;}
+#svgLines{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:1;}
+
+.node{
+  position:absolute;border-radius:10px;
+  padding:10px 12px 8px;
+  text-align:center;cursor:pointer;z-index:2;
+  box-shadow:0 2px 14px rgba(0,0,0,0.5);
+  transition:transform 0.15s,box-shadow 0.2s;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+}
+.node:hover{transform:translateY(-2px);filter:brightness(1.15);}
+.node.lv0{border-radius:14px;padding:14px 18px 12px;}
+.node.lv1{border-radius:12px;padding:12px 16px 10px;}
+.node-t{font-family:'JetBrains Mono',monospace;font-weight:700;letter-spacing:0.5px;line-height:1.25;white-space:pre-line;}
+.node-n{font-size:10px;color:rgba(255,255,255,0.5);margin-top:3px;line-height:1.25;white-space:nowrap;}
+
+.detail{
+  max-width:620px;margin:0 auto;padding:20px;border-radius:12px;
+  border:1px solid;display:none;position:relative;z-index:5;
+}
+.detail.show{display:block;}
+.detail .dt{font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;}
+.detail .db{font-size:11px;padding:2px 8px;border-radius:4px;border:1px solid;opacity:0.7;float:right;}
+.detail .dn{font-size:14px;color:rgba(255,255,255,0.8);margin:8px 0 4px;clear:both;}
+.detail .dd{font-size:13px;color:rgba(255,255,255,0.5);line-height:1.7;}
+.hint{text-align:center;color:rgba(255,255,255,0.2);font-size:11px;letter-spacing:1px;margin-top:16px;position:relative;z-index:5;}
+</style>
+</head>
+<body>
+<div class="page">
+<div class="header">
+  <h1>QUANT TRADING RESEARCH ORG</h1>
+  <p class="sub">AI-Powered Systematic Trading Organization</p>
+  <div class="legend">
+    <span><i style="background:#e94560"></i>ฝ่ายบริหาร</span>
+    <span><i style="background:#00d2ff"></i>แผนกวิจัย</span>
+    <span><i style="background:#a855f7"></i>แผนกประเมินผล</span>
+    <span><i style="background:#22c55e"></i>แผนกบริหารพอร์ต</span>
+    <span><i style="background:#f59e0b"></i>แผนก Infra</span>
+  </div>
+</div>
+
+<div id="canvas">
+  <svg id="svgLines"></svg>
+</div>
+
+<div class="detail" id="detail">
+  <span class="db" id="d-badge"></span>
+  <div class="dt" id="d-title"></div>
+  <div class="dn" id="d-name"></div>
+  <div class="dd" id="d-desc"></div>
+</div>
+<div class="hint">คลิกที่ตำแหน่งเพื่อดูรายละเอียด</div>
+</div>
+
+<script>
+var CLR = {
+  exec:{bg:"#1a1a2e",border:"#e94560",text:"#e94560",glow:"rgba(233,69,96,0.3)",line:"#e94560"},
+  research:{bg:"#0f1b2d",border:"#00d2ff",text:"#00d2ff",glow:"rgba(0,210,255,0.25)",line:"#00d2ff"},
+  eval:{bg:"#1a0f2e",border:"#a855f7",text:"#a855f7",glow:"rgba(168,85,247,0.25)",line:"#a855f7"},
+  portfolio:{bg:"#0f2e1a",border:"#22c55e",text:"#22c55e",glow:"rgba(34,197,94,0.25)",line:"#22c55e"},
+  infra:{bg:"#2e1a0f",border:"#f59e0b",text:"#f59e0b",glow:"rgba(245,158,11,0.25)",line:"#f59e0b"},
+};
+var DEPT_LABEL = {exec:"ฝ่ายบริหาร",research:"แผนกวิจัย",eval:"แผนกประเมินผล",portfolio:"แผนกบริหารพอร์ต",infra:"แผนก Infra"};
+
+// Node definitions: row, col (grid unit), width in px
+var nodes = [
+  {id:"ceo",title:"CEO",name:"Chief Executive Officer",dept:"exec",row:0,col:6.2,w:150,fs:18,
+   desc:"กำหนดทิศทางองค์กร ตัดสินใจ Deploy Strategy จัดสรรทุนภาพรวม ดูแลความยั่งยืนขององค์กร"},
+
+  {id:"cqs",title:"CQS",name:"Chief Quantitative\nStrategist",dept:"exec",row:1,col:2.5,w:150,fs:15,
+   desc:"กำหนดกรอบวิจัย เกณฑ์ขั้นต่ำ (R:R ≥ 1:1.5, Winrate ≥ 40%/ปี, Max DD, Sharpe) ตัดสินว่า Strategy ใดผ่านเกณฑ์เข้า Forward Test"},
+  {id:"cro",title:"CRO",name:"Chief Risk Officer",dept:"exec",row:1,col:7,w:150,fs:15,
+   desc:"ดูแล Portfolio-level Risk กำหนด Correlation Limit ระหว่าง Strategy ควบคุม Position Sizing และ Maximum Exposure ตัดสินใจหยุดระบบเมื่อ Risk เกินเกณฑ์"},
+  {id:"cto",title:"CTO",name:"Chief Technology\nOfficer",dept:"exec",row:1,col:11,w:150,fs:15,
+   desc:"ดูแลโครงสร้างพื้นฐานทั้งหมด ตั้งแต่ Data Pipeline → Backtesting Engine → Execution System กำหนด Tech Stack และ Architecture"},
+
+  {id:"res",title:"Research &\nStrategy",name:"แผนกวิจัยและพัฒนากลยุทธ์",dept:"research",row:2,col:1.2,w:145,fs:13,
+   desc:"สร้างสมมติฐาน พัฒนา Trading Model และ Backtest อย่างเป็นระบบ"},
+  {id:"eva",title:"Evaluation\n& QA",name:"แผนกประเมินผลและ QA",dept:"eval",row:2,col:3.8,w:135,fs:13,
+   desc:"วิเคราะห์ผลลัพธ์ตามเกณฑ์ที่กำหนด ตรวจสอบ Code & Logic ก่อนอนุมัติ Forward Test"},
+  {id:"port",title:"Execution &\nPortfolio",name:"แผนกบริหารพอร์ตและเทรด",dept:"portfolio",row:2,col:7,w:145,fs:13,
+   desc:"จัดสรรน้ำหนักกลยุทธ์แต่ละตัว ดูแล Bot Execution เฝ้าระบบ Live"},
+  {id:"inf",title:"Infrastructure\n& DevOps",name:"แผนก Infra และ DevOps",dept:"infra",row:2,col:11,w:145,fs:13,
+   desc:"ดูแล Server, Deployment, Monitoring, Database ทั้งหมด"},
+
+  {id:"qr",title:"Quant\nResearcher",name:"นักวิจัยเชิงปริมาณ",dept:"research",row:3,col:0,w:110,fs:11,
+   desc:"สร้างสมมติฐานการเทรด พัฒนา Alpha Model ทดสอบ Statistical Edge สร้าง Entry/Exit Logic"},
+  {id:"de",title:"Data\nEngineer",name:"วิศวกรข้อมูล",dept:"research",row:3,col:1.2,w:110,fs:11,
+   desc:"จัดการ Data Pipeline ดึงข้อมูลราคา Volume Sentiment ทำความสะอาดและตรวจสอบคุณภาพ"},
+  {id:"be",title:"Backtest\nEngineer",name:"วิศวกร Backtesting",dept:"research",row:3,col:2.4,w:110,fs:11,
+   desc:"สร้าง Backtesting Infrastructure ป้องกัน Look-ahead Bias, Survivorship Bias, Overfitting"},
+
+  {id:"pa",title:"Performance\nAnalyst",name:"นักวิเคราะห์ผลงาน",dept:"eval",row:3,col:3.5,w:115,fs:11,
+   desc:"วิเคราะห์ Winrate, Sharpe, Sortino, Max DD, Profit Factor, Expectancy แยกรายปี สร้าง Performance Scorecard"},
+  {id:"qa",title:"QA\nEngineer",name:"วิศวกร QA",dept:"eval",row:3,col:4.7,w:110,fs:11,
+   desc:"ตรวจสอบ Data Integrity, Code Logic, Signal Accuracy ป้องกัน Strategy ที่ Overfit หลุดเข้า Forward Test"},
+
+  {id:"ps",title:"Portfolio\nStrategist",name:"นักกลยุทธ์พอร์ต",dept:"portfolio",row:3,col:6,w:110,fs:11,
+   desc:"ออกแบบ Portfolio Composition จัดสรรน้ำหนัก ลด Correlation กระจายความเสี่ยง Rebalance ตามรอบ"},
+  {id:"ee",title:"Execution\nEngineer",name:"วิศวกรเทรด",dept:"portfolio",row:3,col:7.2,w:110,fs:11,
+   desc:"พัฒนา Trading Bot, Order Routing System, Slippage Monitoring, Latency Optimization"},
+  {id:"to",title:"Trading\nOperator",name:"เจ้าหน้าที่เฝ้าระบบ",dept:"portfolio",row:3,col:8.4,w:110,fs:11,
+   desc:"เฝ้าระบบ Live 24/7 ตรวจสอบว่า Bot ทำงานตรงตาม Signal แจ้งเตือนเมื่อเกิดความผิดปกติ Manual Override เมื่อจำเป็น"},
+
+  {id:"dv",title:"DevOps /\nMLOps",name:"วิศวกร DevOps",dept:"infra",row:3,col:10.3,w:115,fs:11,
+   desc:"ดูแล Server, CI/CD Pipeline, Monitoring/Alerting, Container Orchestration, การ Deploy Model และ Bot"},
+  {id:"db",title:"Database\nEngineer",name:"วิศวกรฐานข้อมูล",dept:"infra",row:3,col:11.7,w:115,fs:11,
+   desc:"จัดการ Storage สำหรับ Historical Data, Trade Log, Performance Record ออกแบบ Schema รองรับการขยาย"},
+];
+
+var edges = [
+  ["ceo","cqs"],["ceo","cro"],["ceo","cto"],
+  ["cqs","res"],["cqs","eva"],
+  ["cro","port"],
+  ["cto","inf"],
+  ["res","qr"],["res","de"],["res","be"],
+  ["eva","pa"],["eva","qa"],
+  ["port","ps"],["port","ee"],["port","to"],
+  ["inf","dv"],["inf","db"],
+];
+
+var COL_W = 105;
+var PAD_LEFT = 15;
+var ROW_GAP = 50;
+var canvas = document.getElementById('canvas');
+var svg = document.getElementById('svgLines');
+var sel = null;
+var NM = {}; // node map with measured rects
+
+// Phase 1: Create all node DOM elements (no top yet - need to measure heights)
+nodes.forEach(function(nd){
+  var c = CLR[nd.dept];
+  var x = PAD_LEFT + nd.col * COL_W;
+  var div = document.createElement('div');
+  div.className = 'node' + (nd.row===0?' lv0':nd.row===1?' lv1':'');
+  div.id = 'nd-'+nd.id;
+  div.style.left = x + 'px';
+  div.style.top = '0px'; // temporary
+  div.style.width = nd.w + 'px';
+  div.style.background = c.bg;
+  div.style.border = '2px solid '+c.border;
+
+  div.innerHTML = '<div class="node-t" style="color:'+c.text+';font-size:'+nd.fs+'px">'+nd.title.replace(/\n/g,'<br>')+'</div>'
+    +'<div class="node-n">'+nd.name.replace(/\n/g,'<br>')+'</div>';
+
+  div.onclick = function(e){ e.stopPropagation(); pick(nd.id===sel?null:nd.id); };
+  canvas.appendChild(div);
+  NM[nd.id] = {el:div, data:nd, x:x, w:nd.w};
+});
+
+// Phase 2: Measure actual heights, then compute row Y positions
+function layout(){
+  // Measure max height per row
+  var rowMaxH = [0,0,0,0];
+  nodes.forEach(function(nd){
+    var h = NM[nd.id].el.offsetHeight;
+    NM[nd.id].h = h;
+    if(h > rowMaxH[nd.row]) rowMaxH[nd.row] = h;
+  });
+
+  // Compute row Y
+  var rowY = [30];
+  for(var r=1;r<4;r++){
+    rowY[r] = rowY[r-1] + rowMaxH[r-1] + ROW_GAP;
+  }
+
+  // Position nodes vertically (center within row)
+  nodes.forEach(function(nd){
+    var n = NM[nd.id];
+    var y = rowY[nd.row] + (rowMaxH[nd.row] - n.h)/2;
+    n.el.style.top = y + 'px';
+    n.y = y;
+    n.cx = n.x + n.w/2;
+    n.cy = y + n.h/2;
+    n.bot = y + n.h;
+    n.top = y;
+  });
+
+  // Set canvas size
+  var maxBot = 0;
+  var maxRight = 0;
+  nodes.forEach(function(nd){
+    var n=NM[nd.id];
+    if(n.bot > maxBot) maxBot = n.bot;
+    if(n.x+n.w > maxRight) maxRight = n.x+n.w;
+  });
+  canvas.style.height = (maxBot+40)+'px';
+  canvas.style.width = (maxRight+30)+'px';
+  svg.setAttribute('height', maxBot+40);
+  svg.setAttribute('width', maxRight+30);
+
+  // Draw SVG lines
+  var html = '';
+  edges.forEach(function(e){
+    var pn = NM[e[0]];
+    var cn = NM[e[1]];
+    if(!pn||!cn) return;
+
+    var px = pn.cx;
+    var py = pn.bot;
+    var cx = cn.cx;
+    var cy = cn.top;
+    var midY = Math.round(py + (cy - py) / 2);
+
+    // Line color = child dept color
+    var lineClr = CLR[cn.data.dept].line;
+
+    var path = 'M'+px+' '+py+' L'+px+' '+midY+' L'+cx+' '+midY+' L'+cx+' '+cy;
+    html += '<path d="'+path+'" fill="none" stroke="'+lineClr+'" stroke-width="2" stroke-opacity="0.5" stroke-linejoin="round"/>';
+    html += '<circle cx="'+cx+'" cy="'+cy+'" r="3" fill="'+lineClr+'" fill-opacity="0.6"/>';
+  });
+  svg.innerHTML = html;
+}
+
+layout();
+// Re-layout after fonts load
+if(document.fonts && document.fonts.ready){
+  document.fonts.ready.then(function(){ layout(); });
+}
+setTimeout(layout, 300);
+window.addEventListener('resize', layout);
+
+function pick(id){
+  sel = id;
+  nodes.forEach(function(nd){
+    var n=NM[nd.id]; var c=CLR[nd.dept];
+    if(nd.id===id){
+      n.el.style.background=c.border;
+      n.el.style.boxShadow='0 0 24px '+c.glow+',0 0 48px '+c.glow;
+      n.el.querySelector('.node-t').style.color='#0a0a1a';
+      n.el.querySelector('.node-n').style.color='#0a0a1a';
+    }else{
+      n.el.style.background=c.bg;
+      n.el.style.boxShadow='0 2px 14px rgba(0,0,0,0.5)';
+      n.el.querySelector('.node-t').style.color=c.text;
+      n.el.querySelector('.node-n').style.color='rgba(255,255,255,0.5)';
+    }
+  });
+  var p=document.getElementById('detail');
+  if(id){
+    var nd=null; nodes.forEach(function(n){if(n.id===id)nd=n;});
+    var c=CLR[nd.dept];
+    p.className='detail show';
+    p.style.background=c.bg;
+    p.style.borderColor=c.border;
+    p.style.boxShadow='0 0 30px '+c.glow;
+    document.getElementById('d-title').style.color=c.text;
+    document.getElementById('d-title').textContent=nd.title.replace(/\n/g,' ');
+    document.getElementById('d-badge').style.color=c.text;
+    document.getElementById('d-badge').style.borderColor=c.border;
+    document.getElementById('d-badge').textContent=DEPT_LABEL[nd.dept];
+    document.getElementById('d-name').textContent=nd.name.replace(/\n/g,' ');
+    document.getElementById('d-desc').textContent=nd.desc;
+  }else{
+    p.className='detail';
+  }
+}
+
+document.body.onclick=function(){pick(null);};
+</script>
+</body>
+</html>
